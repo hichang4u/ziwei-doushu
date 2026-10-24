@@ -59,27 +59,35 @@ export default function KnowledgeHomePage() {
           <Msg k="knowledge.fourteen" />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          {ALL_STARS.map(star => (
-            <Link
-              key={star}
-              href={`/knowledge/${STAR_TO_SLUG[star]}/overview`}
-              style={{
-                display: 'block',
-                padding: '14px 10px',
-                background: 'var(--bg-card)',
-                border: '1px solid rgba(184,146,42,0.2)',
-                borderRadius: '10px',
-                textDecoration: 'none',
-                textAlign: 'center',
-                transition: 'all 0.2s',
-              }}
-              className="hover:shadow-md hover:border-amber-400"
-            >
+          {ALL_STARS.map(star => {
+            const cardStyle = {
+              display: 'block',
+              padding: '14px 10px',
+              background: 'var(--bg-card)',
+              border: '1px solid rgba(184,146,42,0.2)',
+              borderRadius: '10px',
+              textDecoration: 'none',
+              textAlign: 'center',
+              transition: 'all 0.2s',
+            } as const;
+            const label = (
               <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--tx-0)', letterSpacing: '0.15em' }}>
                 <KoTermText zh={star} term={MAJOR_STARS_KO[star]} />
               </div>
-            </Link>
-          ))}
+            );
+            // 开源版 STAR_DB 为空、详情页不生成：没有详情时只显示卡片，不链到 404
+            if (!getKnowledge(star, 'overview').exists) return <div key={star} style={cardStyle}>{label}</div>;
+            return (
+              <Link
+                key={star}
+                href={`/knowledge/${STAR_TO_SLUG[star]}/overview`}
+                style={cardStyle}
+                className="hover:shadow-md hover:border-amber-400"
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
 
         {/* 详细列表（每个主星 + 简介 + 进入按钮） */}
