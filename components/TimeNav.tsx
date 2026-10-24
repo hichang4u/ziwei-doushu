@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { STEMS, SI_HUA_TABLE } from '@/lib/ziwei/constants';
 import type { ZiweiChart } from '@/lib/ziwei/types';
+import { useLocale } from './LocaleProvider';
 
 export type TimeView = 'mingpan' | 'daxian' | 'liunian';
 
@@ -45,6 +46,7 @@ export default function TimeNav({
   onYearChange,
 }: TimeNavProps) {
   const currentDx = chart.daXians[chart.currentDaXianIndex];
+  const { m, termStr, ganzhi } = useLocale();
 
   // 计算当前叠加四化信息
   const getOverlayInfo = (): { stemName: string; overlay: Record<string, string> } | null => {
@@ -85,7 +87,7 @@ export default function TimeNav({
           active={view === 'mingpan'}
           onClick={() => onViewChange('mingpan')}
         >
-          本命
+          {m.timeNav.natal}
         </TabButton>
 
         {/* 大限 */}
@@ -93,7 +95,7 @@ export default function TimeNav({
           active={view === 'daxian'}
           onClick={() => onViewChange('daxian')}
         >
-          {currentDx ? `大限 ${currentDx.startAge}–${currentDx.endAge}` : '大限'}
+          {currentDx ? m.timeNav.daXianRange(currentDx.startAge, currentDx.endAge) : m.timeNav.daXian}
         </TabButton>
 
         {/* 流年 — 含年份切换 */}
@@ -113,7 +115,7 @@ export default function TimeNav({
             className="text-[10px] font-medium flex-1 text-center"
             style={{ color: view === 'liunian' ? 'var(--t-gold)' : 'var(--t-faint)' }}
           >
-            流年
+            {m.timeNav.liuNian}
           </button>
           {/* 年份 +/- */}
           <div className="flex items-center gap-0.5">
@@ -151,14 +153,14 @@ export default function TimeNav({
           className="flex items-center gap-2 mt-1.5 px-1 flex-wrap"
         >
           <span className="text-[9px]" style={{ color: 'var(--t-faint)' }}>
-            {view === 'daxian' ? '大限' : `${liunianYear}`}·{overlayInfo.stemName}年四化：
+            {m.timeNav.overlayHead(view === 'daxian' ? m.timeNav.daXian : `${liunianYear}`, ganzhi(overlayInfo.stemName).main)}
           </span>
           {(['禄', '权', '科', '忌'] as const).map(sh => {
             const starName = Object.keys(overlayInfo.overlay).find(k => overlayInfo.overlay[k] === sh);
             if (!starName) return null;
             return (
               <span key={sh} className="text-[9px] font-medium" style={{ color: SIHUA_COLORS[sh] }}>
-                {starName}化{sh}
+                {m.timeNav.starSihua(termStr(starName), termStr(`化${sh}`))}
               </span>
             );
           })}
