@@ -1,13 +1,21 @@
 import type { BirthFormState } from '@/components/BirthForm';
 import type { BirthInfo } from './types';
+import { resolveBirthTime, type ResolvedBirthTime } from './birth-time';
 
-/** 根据北京时间 + 经度计算真太阳时时辰支 (0-11) */
-export function calcTrueSolarBranch(clockHour: number, clockMinute: number, longitude: number): number {
-  const clockMins = clockHour * 60 + clockMinute;
-  const offset = (longitude - 120) * 4;
-  const solar = ((clockMins + offset) % 1440 + 1440) % 1440;
-  if (solar >= 1380 || solar < 60) return 0;
-  return Math.floor((solar - 60) / 120) + 1;
+/** 表单状态 → 排盘日 + 时辰支（口径见 birth-time.ts） */
+export function resolveFormBirthTime(form: BirthFormState): ResolvedBirthTime {
+  return resolveBirthTime({
+    year: parseInt(form.year) || 0,
+    month: parseInt(form.month) || 0,
+    day: parseInt(form.day) || 0,
+    clockHour: parseInt(form.clockHour) || 0,
+    clockMinute: parseInt(form.clockMinute) || 0,
+    unknownTime: form.unknownTime,
+    country: form.country ?? 'CN',
+    longitude: form.province ? form.longitude : undefined,
+    koreaTimeRule: form.koreaTimeRule,
+    koreaDstClock: form.koreaDstClock,
+  });
 }
 
 /** BirthFormState → BirthInfo
@@ -16,34 +24,28 @@ export function calcTrueSolarBranch(clockHour: number, clockMinute: number, long
  * · 23:00-23:59 = 晚子时，**按次日**排盘（日期 +1）
  * · 00:00-00:59 = 早子时，按本日排盘
  * 这与「时辰支同为子(0)」并不冲突——子时分早晚两段，需要在日期上区分。
+ * 早晚子时按**校正后**的时刻判断（真太阳时 / 韩国历史偏移折算之后），见 birth-time.ts。
+ *
+ * 日期不存在、或韩国夏令时拨快的空档时刻 → 抛 RangeError（表单层应先拦下）。
  */
 export function formToBirthInfo(form: BirthFormState): BirthInfo {
-  let y = parseInt(form.year) || 0;
-  let m = parseInt(form.month) || 0;
-  let d = parseInt(form.day) || 0;
-
-  // 晚子时（23:00-23:59）按次日处理：用 Date 对象自动处理月末/年末进位
-  if (!form.unknownTime) {
-    const clockHour = parseInt(form.clockHour) || 0;
-    if (clockHour === 23 && y > 0 && m > 0 && d > 0) {
-      const next = new Date(y, m - 1, d + 1);
-      y = next.getFullYear();
-      m = next.getMonth() + 1;
-      d = next.getDate();
-    }
-  }
-
-  const hour = form.unknownTime
-    ? 0
-    : calcTrueSolarBranch(parseInt(form.clockHour) || 0, parseInt(form.clockMinute) || 0, form.longitude);
+  const r = resolveFormBirthTime(form);
+  if (!r.ok) throw new RangeError(`birth time unresolvable: ${r.reason}`);
   return {
-    year: y, month: m, day: d,
-    hour,
+    year: r.year, month: r.month, day: r.day,
+    hour: r.branch,
     gender: form.gender,
     name: form.name || undefined,
     province: form.province || undefined,
     city: form.city || undefined,
     longitude: form.province ? form.longitude : undefined,
+    origInput: form.unknownTime ? undefined : {
+      year: parseInt(form.year) || 0,
+      month: parseInt(form.month) || 0,
+      day: parseInt(form.day) || 0,
+      clockHour: parseInt(form.clockHour) || 0,
+      clockMinute: parseInt(form.clockMinute) || 0,
+    },
   };
 }
 
@@ -63,6 +65,12 @@ export function formToSearchParams(form: BirthFormState): URLSearchParams {
   if (form.province) p.set('p', form.province);
   if (form.city) p.set('c', form.city);
   if (form.longitude && form.longitude !== 120) p.set('lo', String(form.longitude));
+  // 韩国路径参数只在韩国出生时写入，老链接与中国出生链接保持原样
+  if (form.country === 'KR') {
+    p.set('co', 'kr');
+    if (form.koreaTimeRule === 'kst-wall') p.set('kr', 'w');
+    if (form.koreaDstClock) p.set('ds', '1');
+  }
   p.set('g', form.gender === 'male' ? 'm' : 'f');
   return p;
 }
@@ -84,6 +92,9 @@ export function searchParamsToForm(params: URLSearchParams): Partial<BirthFormSt
     province: params.get('p') || '',
     city: params.get('c') || '',
     longitude: parseFloat(params.get('lo') || '120'),
+    country: params.get('co') === 'kr' ? 'KR' : 'CN',
+    koreaTimeRule: params.get('kr') === 'w' ? 'kst-wall' : 'true-solar',
+    koreaDstClock: params.get('ds') === '1',
     gender: params.get('g') === 'f' ? 'female' : 'male',
   };
 }

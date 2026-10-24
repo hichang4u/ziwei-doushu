@@ -20,6 +20,12 @@
  *     不悄悄挪到相邻时刻：多半是用户记录有误，应让界面提示。
  *   · 夏令时结束拨回时重复的那一段（如 1987-10-11 02:00~02:59）出现两次 → 取较早的那一刻
  *     （仍在夏令时内），并标 ambiguous: true 供界面提示。
+ *
+ * 夏令时读数还是标准时读数（clock 选项）：
+ *   与 dst-cn.ts 同一立场 —— 我们无法知道用户报的是当年夏令时钟表读数，还是已换算过的标准时。
+ *   · 'standard'（默认）：所填视为标准时，夏令时期间按去掉那一小时的偏移解析（UTC+10→+9、UTC+9:30→+8:30）
+ *   · 'actual'：所填视为当年实际钟表读数，按 IANA 实际偏移解析
+ *   +8:30 时期是当年的法定标准时，不是夏令时，两种选项下都会自动折算。
  */
 
 import { calculateTrueSolarTime, type TrueSolarTimeInput, type TrueSolarTimeResult } from './true-solar-time';
@@ -38,14 +44,21 @@ export interface LocalClock {
   minute: number;
 }
 
+/** 所填钟表读数的含义，见文件头注 */
+export type SeoulClockReading = 'standard' | 'actual';
+
+export interface SeoulResolveOptions {
+  clock?: SeoulClockReading;
+}
+
 export type SeoulTimeResolution =
   | {
       ok: true;
       /** 该钟表时刻对应的 UTC 毫秒 */
       utcMs: number;
-      /** 当时的 UTC 偏移（分钟，地方平时时期带小数） */
+      /** 解析所用的 UTC 偏移（分钟，地方平时时期带小数）；clock='standard' 时已去掉夏令时那一小时 */
       offsetMinutes: number;
-      /** 当时是否夏令时（UTC+10 / UTC+9:30） */
+      /** 该时刻韩国是否正实行夏令时（UTC+10 / UTC+9:30），与 clock 选项无关，供界面提示 */
       isDst: boolean;
       /** 夏令时结束日重复出现的钟表时刻 */
       ambiguous: boolean;
@@ -58,7 +71,7 @@ export type KstWallClockResult =
       offsetMinutes: number;
       isDst: boolean;
       ambiguous: boolean;
-      /** 折算后相对输入钟表的平移量（分钟）：+8:30 时期 +30，夏令时 -60 / -30 */
+      /** 折算后相对输入钟表的平移量（分钟）：+8:30 时期 +30，clock='actual' 时夏令时 -60 / -30 */
       shiftMinutes: number;
     })
   | { ok: false; reason: 'gap' };
@@ -87,22 +100,29 @@ function seoulOffsetSecondsAt(utcMs: number): number {
   return m[1] === '-' ? -seconds : seconds;
 }
 
+/** 去掉夏令时那一小时后的「标准时」偏移（秒）：标准时偏移只在 1908/1912/1954/1961 换制时变化 */
+function seoulStandardOffsetSecondsAt(utcMs: number): number {
+  const offset = seoulOffsetSecondsAt(utcMs);
+  return DST_OFFSET_SECONDS.has(offset) ? offset - 3600 : offset;
+}
+
 /**
  * 把首尔当地钟表时刻还原成 UTC。
  *
  * 做法：钟表读数当成 UTC 得到 naive；真实时刻 = naive - 偏移，而偏移只可能是 naive 前后
  * 半天内出现过的值（首尔一天内至多一次切换）。逐个候选回代验证「候选 + 候选时刻的偏移 = naive」，
- * 0 个成立即钟表空档，2 个成立即重复时刻。
+ * 0 个成立即钟表空档，2 个成立即重复时刻。clock='standard' 时把偏移函数换成标准时偏移，算法不变。
  */
-export function resolveSeoulLocalTime(clock: LocalClock): SeoulTimeResolution {
+export function resolveSeoulLocalTime(clock: LocalClock, opts: SeoulResolveOptions = {}): SeoulTimeResolution {
+  const offsetAt = opts.clock === 'actual' ? seoulOffsetSecondsAt : seoulStandardOffsetSecondsAt;
   const naive = Date.UTC(clock.year, clock.month - 1, clock.day, clock.hour, clock.minute);
   const HALF_DAY = 12 * 3600_000;
-  const offsets = new Set([seoulOffsetSecondsAt(naive - HALF_DAY), seoulOffsetSecondsAt(naive + HALF_DAY)]);
+  const offsets = new Set([offsetAt(naive - HALF_DAY), offsetAt(naive + HALF_DAY)]);
 
   const hits: { utcMs: number; offset: number }[] = [];
   for (const offset of offsets) {
     const utcMs = naive - offset * 1000;
-    if (seoulOffsetSecondsAt(utcMs) === offset) hits.push({ utcMs, offset });
+    if (offsetAt(utcMs) === offset) hits.push({ utcMs, offset });
   }
   if (hits.length === 0) return { ok: false, reason: 'gap' };
 
@@ -112,14 +132,14 @@ export function resolveSeoulLocalTime(clock: LocalClock): SeoulTimeResolution {
     ok: true,
     utcMs,
     offsetMinutes: offset / 60,
-    isDst: DST_OFFSET_SECONDS.has(offset),
+    isDst: DST_OFFSET_SECONDS.has(seoulOffsetSecondsAt(utcMs)),
     ambiguous: hits.length > 1,
   };
 }
 
-/** KST 钟表口径：当年钟表读数 → 同一时刻的 UTC+9 钟表读数（不做经度修正）。 */
-export function toKstWallClock(clock: LocalClock): KstWallClockResult {
-  const r = resolveSeoulLocalTime(clock);
+/** KST 钟表口径：钟表读数 → 同一时刻的 UTC+9 钟表读数（不做经度修正）。 */
+export function toKstWallClock(clock: LocalClock, opts: SeoulResolveOptions = {}): KstWallClockResult {
+  const r = resolveSeoulLocalTime(clock, opts);
   if (!r.ok) return r;
   const kst = new Date(r.utcMs + KST_OFFSET_MINUTES * 60_000);
   return {
@@ -142,11 +162,12 @@ export function toKstWallClock(clock: LocalClock): KstWallClockResult {
  */
 export function koreaTrueSolarTime(
   input: Omit<TrueSolarTimeInput, 'utcOffsetMinutes'>,
+  opts: SeoulResolveOptions = {},
 ): KoreaTrueSolarResult {
   const r = resolveSeoulLocalTime({
     year: input.year, month: input.month, day: input.day,
     hour: input.clockHour, minute: input.clockMinute,
-  });
+  }, opts);
   if (!r.ok) return r;
   const solar = calculateTrueSolarTime({
     ...input,

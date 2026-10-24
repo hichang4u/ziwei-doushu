@@ -5,6 +5,9 @@ import type { BirthInfo } from '@/lib/ziwei/types';
 import { SHICHEN } from '@/lib/ziwei/constants';
 import { useTheme } from '@/components/ThemeProvider';
 import { PROVINCES } from '@/lib/ziwei/cities';
+import { KR_PROVINCES } from '@/lib/ziwei/cities-kr';
+import { formToBirthInfo, resolveFormBirthTime } from '@/lib/ziwei/share';
+import type { BirthCountry, KoreaTimeRule } from '@/lib/ziwei/birth-time';
 
 export interface BirthFormState {
   name: string;
@@ -18,6 +21,12 @@ export interface BirthFormState {
   city: string;
   longitude: number;
   gender: 'male' | 'female';
+  // 以下三项后加：历史记录 / 分享链接里的旧数据没有，缺省按中国出生处理
+  country?: BirthCountry;
+  /** 韩国：真太阳时 / KST 钟表口径 */
+  koreaTimeRule?: KoreaTimeRule;
+  /** 韩国：所填为当年夏令时钟表读数 */
+  koreaDstClock?: boolean;
 }
 
 interface BirthFormProps {
@@ -30,15 +39,6 @@ interface BirthFormProps {
 }
 
 const SHICHEN_NAMES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-
-/** 根据北京时间 + 经度计算真太阳时时辰支 (0-11) */
-function calcTrueSolarBranch(clockHour: number, clockMinute: number, longitude: number): number {
-  const clockMins = clockHour * 60 + clockMinute;
-  const offset = (longitude - 120) * 4;
-  const solar = ((clockMins + offset) % 1440 + 1440) % 1440;
-  if (solar >= 1380 || solar < 60) return 0;
-  return Math.floor((solar - 60) / 120) + 1;
-}
 
 /** 检查日期是否合法 */
 function isValidDate(y: number, m: number, d: number): boolean {
@@ -63,7 +63,11 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
     city: initialData?.city ?? '',
     longitude: initialData?.longitude ?? 120,
     gender: initialData?.gender ?? 'male',
+    country: initialData?.country ?? 'CN',
+    koreaTimeRule: initialData?.koreaTimeRule ?? 'true-solar',
+    koreaDstClock: initialData?.koreaDstClock ?? false,
   });
+  const isKorea = form.country === 'KR';
 
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -74,22 +78,25 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
+  const provinceList = isKorea ? KR_PROVINCES : PROVINCES;
   const cityList = useMemo(() => {
-    const prov = PROVINCES.find(p => p.name === form.province);
+    const prov = provinceList.find(p => p.name === form.province);
     return prov ? prov.cities : [];
-  }, [form.province]);
+  }, [provinceList, form.province]);
 
-  const branch = useMemo(() => {
-    if (form.unknownTime) return 0;
-    return calcTrueSolarBranch(
-      parseInt(form.clockHour) || 0,
-      parseInt(form.clockMinute) || 0,
-      form.longitude,
-    );
-  }, [form.clockHour, form.clockMinute, form.longitude, form.unknownTime]);
-
-  const offsetMin = Math.round((form.longitude - 120) * 4);
-  const shichenInfo = SHICHEN[branch];
+  // 排盘日 + 时辰：与提交、合盘、分享走同一个函数（lib/ziwei/birth-time.ts）
+  // 未选日期时 resolved 为 invalid-date，时辰显示「—」：韩国历史偏移与均时差都依赖日期，不猜
+  const resolved = useMemo(() => resolveFormBirthTime(form), [form]);
+  const branch = resolved.ok ? resolved.branch : 0;
+  const offsetMin = resolved.ok && !form.unknownTime ? Math.round(resolved.correctionMinutes) : null;
+  const shichenInfo = resolved.ok ? SHICHEN[branch] : undefined;
+  const inputDate = { y: parseInt(form.year) || 0, m: parseInt(form.month) || 0, d: parseInt(form.day) || 0 };
+  const dayShifted = resolved.ok && !form.unknownTime
+    && (resolved.year !== inputDate.y || resolved.month !== inputDate.m || resolved.day !== inputDate.d);
+  const kstWall = isKorea && form.koreaTimeRule === 'kst-wall';
+  // 夏令时勾选框：出生时刻处于韩国夏令时，或已勾选却落进拨快空档（需让用户能取消勾选）
+  const showDstToggle = isKorea && !form.unknownTime
+    && (resolved.ok ? resolved.koreaDst : resolved.reason === 'gap' && !!form.koreaDstClock);
 
   // ─── 校验逻辑 ───────────────────────────────────────────
   const y = parseInt(form.year) || 0;
@@ -103,6 +110,11 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
     month: !form.month ? '请选择月份' : '',
     day: !form.day ? '请选择日期'
       : form.year && form.month && !isValidDate(y, m, d) ? `${m}月没有${d}日`
+      : '',
+    time: !resolved.ok && resolved.reason === 'gap'
+      ? (form.koreaDstClock
+        ? '该时刻在韩国当年钟表上不存在（夏令时拨快跳过的一小时）。请核对出生时间，或取消「按当年夏令时钟表填写」'
+        : '该时刻在韩国当年钟表上不存在（标准时换制跳过的时段）。请核对出生时间')
       : '',
   };
   const hasError = Object.values(errors).some(Boolean);
@@ -127,14 +139,19 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
       ].filter(Boolean).join(' · ')
     : '';
 
+  const handleCountry = (country: BirthCountry) => {
+    // 两国省市表不通用，切换时清空出生地
+    setForm({ ...form, country, province: '', city: '', longitude: 120 });
+  };
+
   const handleProvince = (prov: string) => {
-    const provData = PROVINCES.find(p => p.name === prov);
+    const provData = provinceList.find(p => p.name === prov);
     const firstCity = provData?.cities[0];
     setForm({ ...form, province: prov, city: firstCity?.name || '', longitude: firstCity?.longitude ?? 120 });
   };
 
   const handleCity = (cityName: string) => {
-    const prov = PROVINCES.find(p => p.name === form.province);
+    const prov = provinceList.find(p => p.name === form.province);
     const cityData = prov?.cities.find(c => c.name === cityName);
     setForm({ ...form, city: cityName, longitude: cityData?.longitude ?? 120 });
   };
@@ -145,7 +162,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
     setTouched({ year: true, month: true, day: true });
     if (hasError) return;
     onFormSave?.({ ...form });
-    onSubmit({ year: y, month: m, day: d, hour: branch, gender: form.gender, name: form.name || undefined, province: form.province || undefined, city: form.city || undefined, longitude: form.province ? form.longitude : undefined });
+    onSubmit(formToBirthInfo(form));
   };
 
   // ─── 样式变量 ────────────────────────────────────────────
@@ -162,6 +179,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
   const panelBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,250,235,0.7)';
   const panelBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(200,160,60,0.2)';
   const goldText = isDark ? '#d4a843' : '#7a5008';
+  const hintClr = isDark ? 'rgba(170,195,220,0.75)' : 'rgba(140,100,20,0.5)';
   const summaryBg = isDark ? 'rgba(37,99,235,0.12)' : 'rgba(37,99,235,0.07)';
   const summaryBorder = isDark ? 'rgba(37,99,235,0.35)' : 'rgba(37,99,235,0.25)';
   const summaryClr = isDark ? 'rgba(147,197,253,0.9)' : 'rgba(37,99,235,0.85)';
@@ -291,6 +309,16 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
       {/* ── 出生地点 ── */}
       <div style={{ marginBottom: '16px' }}>
         <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>出生地点（用于真太阳时校正）</label>
+        <select
+          value={form.country}
+          onChange={e => handleCountry(e.target.value as BirthCountry)}
+          style={{ ...inputStyle, marginBottom: '8px' }}
+          onFocus={e => { e.target.style.borderColor = focusBorder; }}
+          onBlur={e => { e.target.style.borderColor = inputBorder; }}
+        >
+          <option value="CN">中国</option>
+          <option value="KR">韩国（대한민국）</option>
+        </select>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           <select
             value={form.province}
@@ -299,8 +327,8 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
             onFocus={e => { e.target.style.borderColor = focusBorder; }}
             onBlur={e => { e.target.style.borderColor = inputBorder; }}
           >
-            <option value="">省份 / 直辖市</option>
-            {PROVINCES.map(p => (
+            <option value="">{isKorea ? '시·도' : '省份 / 直辖市'}</option>
+            {provinceList.map(p => (
               <option key={p.name} value={p.name}>{p.name}</option>
             ))}
           </select>
@@ -312,7 +340,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
             onFocus={e => { e.target.style.borderColor = focusBorder; }}
             onBlur={e => { e.target.style.borderColor = inputBorder; }}
           >
-            <option value="">{form.province ? '城市' : '先选省份'}</option>
+            <option value="">{form.province ? (isKorea ? '시·군' : '城市') : (isKorea ? '先选시·도' : '先选省份')}</option>
             {cityList.map(c => (
               <option key={c.name} value={c.name}>{c.name}</option>
             ))}
@@ -327,7 +355,8 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
               exit={{ opacity: 0 }}
               style={{ fontSize: '10px', color: isDark ? 'rgba(180,210,235,0.85)' : 'rgba(100,70,10,0.5)', marginTop: '5px' }}
             >
-              {form.city || '（请选择城市）'} · 经度 {form.longitude.toFixed(1)}°E · 时差 {offsetMin > 0 ? '+' : ''}{offsetMin} 分钟
+              {form.city || '（请选择城市）'} · 经度 {form.longitude.toFixed(2)}°E
+              {kstWall ? ' · KST 钟表口径不做经度校正' : offsetMin !== null && ` · 时差 ${offsetMin > 0 ? '+' : ''}${offsetMin} 分钟`}
             </motion.p>
           ) : (
             <motion.p
@@ -337,7 +366,9 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
               exit={{ opacity: 0 }}
               style={{ fontSize: '10px', color: isDark ? 'rgba(165,185,210,0.7)' : 'rgba(140,100,20,0.45)', marginTop: '5px' }}
             >
-              * 倪海厦批命用真太阳时，建议填写出生地以自动校正时辰
+              {isKorea && !kstWall
+                ? '* 未选城市时按首尔经度（126.98°E）校正真太阳时'
+                : '* 倪海厦批命用真太阳时，建议填写出生地以自动校正时辰'}
             </motion.p>
           )}
         </AnimatePresence>
@@ -345,7 +376,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
 
       {/* ── 出生时间 ── */}
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>出生时间（北京时间）</label>
+        <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>{isKorea ? '出生时间（韩国当地钟表时间）' : '出生时间（北京时间）'}</label>
         <div style={{ borderRadius: '14px', padding: '12px', background: panelBg, border: `1px solid ${panelBorder}`, opacity: form.unknownTime ? 0.45 : 1, pointerEvents: form.unknownTime ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
             <select
@@ -369,17 +400,66 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
           </div>
           {/* 真太阳时结果 */}
           <div style={{ textAlign: 'center', padding: '4px 0' }}>
-            <span style={{ fontSize: '10px', color: isDark ? 'rgba(170,195,220,0.75)' : 'rgba(140,100,20,0.5)' }}>真太阳时 → </span>
+            <span style={{ fontSize: '10px', color: hintClr }}>{kstWall ? 'KST 钟表 → ' : '真太阳时 → '}</span>
             <span style={{ fontSize: '15px', color: goldText, fontWeight: 600, letterSpacing: '0.08em' }}>
-              {SHICHEN_NAMES[branch]}时
+              {resolved.ok ? `${SHICHEN_NAMES[branch]}时` : '—'}
             </span>
             {shichenInfo && (
-              <span style={{ fontSize: '10px', color: isDark ? 'rgba(170,195,220,0.75)' : 'rgba(140,100,20,0.5)', marginLeft: '4px' }}>
+              <span style={{ fontSize: '10px', color: hintClr, marginLeft: '4px' }}>
                 （{shichenInfo.range}）
               </span>
             )}
+            {resolved.ok && resolved.adjustedHour !== null && offsetMin !== 0 && (
+              <span style={{ fontSize: '10px', color: hintClr, marginLeft: '4px' }}>
+                校正后 {String(resolved.adjustedHour).padStart(2, '0')}:{String(resolved.adjustedMinute).padStart(2, '0')}
+              </span>
+            )}
+            {dayShifted && resolved.ok && (
+              <p style={{ fontSize: '10px', color: hintClr, marginTop: '2px' }}>
+                按 {resolved.year}年{resolved.month}月{resolved.day}日 排盘（晚子时 / 校正跨零点换日）
+              </p>
+            )}
           </div>
+          {/* 韩国：口径与历史时制 */}
+          {isKorea && (
+            <div style={{ borderTop: `1px solid ${panelBorder}`, marginTop: '8px', paddingTop: '8px', fontSize: '10px', color: hintClr }}>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                {([['true-solar', '真太阳时（经度 + 均时差）'], ['kst-wall', 'KST 钟表（不做经度校正）']] as const).map(([rule, label]) => (
+                  <label key={rule} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="koreaTimeRule"
+                      checked={form.koreaTimeRule === rule}
+                      onChange={() => setForm({ ...form, koreaTimeRule: rule })}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+              {resolved.ok && resolved.korea0830 && (
+                <p style={{ marginTop: '6px' }}>* 该日期韩国标准时为 UTC+8:30（1908–1911、1954–1961），已自动折算</p>
+              )}
+              {showDstToggle && (
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', marginTop: '6px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={!!form.koreaDstClock}
+                    onChange={e => setForm({ ...form, koreaDstClock: e.target.checked })}
+                    style={{ marginTop: '2px' }}
+                  />
+                  <span>
+                    出生时韩国正实行夏令时（钟表拨快 {resolved.ok && resolved.korea0830 ? '1 小时，UTC+9:30' : '1 小时，UTC+10'}）。
+                    所填为<b>当年钟表读数</b>请勾选；已换算成标准时则不勾。
+                  </span>
+                </label>
+              )}
+              {resolved.ok && resolved.ambiguous && (
+                <p style={{ marginTop: '6px' }}>* 夏令时结束当晚该钟表时刻出现两次，已按较早（夏令时内）的一次排盘</p>
+              )}
+            </div>
+          )}
         </div>
+        <FieldError msg={errors.time} />
         <label style={{ display: 'flex', alignItems: 'center', gap: '7px', marginTop: '8px', cursor: 'pointer' }}>
           <input
             type="checkbox"
