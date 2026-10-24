@@ -109,5 +109,5 @@ npm test             # 회귀 테스트 (배반 엔진, 한국 시간대, 출생
 
 기여 방법은 [CONTRIBUTING.ko.md](./CONTRIBUTING.ko.md)에 정리돼 있습니다.
 
-- **원본 엔진·데이터셋에 관한 문제와 제안**: 원본 저장소의 [Discussions](https://github.com/Renhuai123/ziwei-doushu/discussions)와 이슈 템플릿을 이용하세요.
-- **한국 출생 시간 처리·한국어 화면에 관한 문제**: 이 포크 저장소([hichang4u/ziwei-doushu](https://github.com/hichang4u/ziwei-doushu))에 남겨 주세요.
+- **사용법 문의와 의견 교환**: 이 포크의 [Discussions](https://github.com/hichang4u/ziwei-doushu/discussions)를 이용하세요.
+- **명반 결과 문의, 오류 신고, 기능 제안**: 이 포크의 [Issues](https://github.com/hichang4u/ziwei-doushu/issues)에서 해당 템플릿으로 남겨 주세요.

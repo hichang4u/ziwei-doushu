@@ -110,4 +110,4 @@ Download from [Releases](https://github.com/Renhuai123/ziwei-doushu/releases/tag
 | Classical texts | Public domain |
 | Ni Haixia quotes (`docs/tianji-ziwei/`) | [CC BY-NC-SA 4.0](./docs/tianji-ziwei/LICENSE.md): **non-commercial only** |
 
-Contributions are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md); questions go to [Discussions](https://github.com/Renhuai123/ziwei-doushu/discussions).
+Contributions are welcome. Please read [CONTRIBUTING.md](./CONTRIBUTING.md); questions go to [Discussions](https://github.com/hichang4u/ziwei-doushu/discussions).

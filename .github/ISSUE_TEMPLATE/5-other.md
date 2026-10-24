@@ -9,13 +9,13 @@ labels: []
 先看一眼：
 - 觉得盘排得不对 → 用「排盘结果疑问」模板（要附出生信息和对照结果）
 - 代码报错 → 用「程序问题」模板
-- 使用问题、想法交流 → 讨论区 https://github.com/Renhuai123/ziwei-doushu/discussions
+- 使用问题、想法交流 → 讨论区 https://github.com/hichang4u/ziwei-doushu/discussions
 请勿贴出手机号、验证码或他人的生辰等隐私信息。
 
 먼저 확인해 주세요:
 - 명반이 틀린 것 같다 → 「배반 결과 문의」 템플릿(출생 정보와 비교 결과 필요)
 - 코드 오류 → 「프로그램 문제」 템플릿
-- 사용법 문의, 의견 교환 → 토론 게시판 https://github.com/Renhuai123/ziwei-doushu/discussions
+- 사용법 문의, 의견 교환 → 토론 게시판 https://github.com/hichang4u/ziwei-doushu/discussions
 전화번호, 인증번호, 타인의 생년월일시 같은 개인정보는 올리지 마세요.
 -->
 

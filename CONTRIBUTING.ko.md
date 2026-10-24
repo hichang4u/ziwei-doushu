@@ -8,11 +8,11 @@
 - 공개 버전에는 해석 데이터베이스, AI 해석 프롬프트, 모든 `/api/*` 백엔드 API가 **없습니다**([중국어 README](./README.md)의 「开源边界(공개 범위)」 참고). AI 해석과 궁합 분석이 공개 버전에서 404를 돌려주는 것은 의도된 동작이며, 직접 구현해야 합니다.
 
 > **한국어 포크에 관하여**
-> 이 문서는 한국어 포크([hichang4u/ziwei-doushu](https://github.com/hichang4u/ziwei-doushu))에서 번역하고 덧붙인 것입니다. 아래 「질문하기」와 「코드 제출」은 원본 저장소 [Renhuai123/ziwei-doushu](https://github.com/Renhuai123/ziwei-doushu)의 규칙이고, 「한국어 포크 기여」는 이 포크에만 해당합니다.
+> 이 문서는 한국어 포크([hichang4u/ziwei-doushu](https://github.com/hichang4u/ziwei-doushu))에서 번역하고 덧붙인 것입니다. 「질문하기」와 「코드 제출」은 원본 저장소 [Renhuai123/ziwei-doushu](https://github.com/Renhuai123/ziwei-doushu)의 규칙을 옮긴 것으로 이 포크에도 그대로 적용하며, 「한국어 포크 기여」는 이 포크에만 해당합니다. 문의와 신고는 모두 이 포크로 남겨 주세요.
 
 ## 질문하기
 
-- **사용법 문의와 의견 교환**: [Discussions](https://github.com/Renhuai123/ziwei-doushu/discussions)를 이용하세요.
+- **사용법 문의와 의견 교환**: [Discussions](https://github.com/hichang4u/ziwei-doushu/discussions)를 이용하세요.
 - **명반이 틀린 것 같을 때**: 「排盘结果疑问(배반 결과 문의)」 템플릿을 쓰고 양력 생년월일, 몇 시 몇 분, 출생지 또는 경도, 성별, 이 프로젝트의 결과, 비교 대상 결과를 함께 적어 주세요. "안 맞는다"만으로는 확인할 수 없습니다.
   - 보좌성 밝기, 윤달 처리, 야자시에 날짜를 바꾸는지는 유파마다 원래 다르기 때문에 엔진에서 전환할 수 있게 해 두었습니다. 이런 차이는 버그가 아니지만, 지적은 환영합니다.
 - **프로그램 오류, 화면 이상**: 「程序问题(프로그램 문제)」 템플릿에 재현 순서와 오류 내용을 적어 주세요.
@@ -34,7 +34,7 @@ npm test             # 배반 회귀 테스트
 
 ## 한국어 포크 기여
 
-한국 출생 시간 처리와 한국어 화면에 관한 문제·제안은 원본 저장소가 아니라 [이 포크 저장소](https://github.com/hichang4u/ziwei-doushu)에 남겨 주세요.
+한국 출생 시간 처리와 한국어 화면에 관한 문제·제안도 [이 포크의 Issues](https://github.com/hichang4u/ziwei-doushu/issues)에 남겨 주세요.
 
 - **한국 출생 시간** (`lib/ziwei/tz-kr.ts`, `lib/ziwei/birth-time.ts`): 시각이 틀린다고 보면 생년월일, 시계 시각, 출생 도시, 선택한 처리 방식(진태양시 / KST 시각), 「당시 서머타임 시계 기준」 체크 여부를 적어 주세요. 과거 오프셋은 IANA `Asia/Seoul` 데이터를 따르므로, 이와 다른 주장은 근거 자료가 필요합니다.
 - **도시 경도** (`lib/ziwei/cities-kr.ts`): 시청·군청 위치 기준입니다. 고칠 때는 출처를 함께 적어 주세요.
