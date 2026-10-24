@@ -1,28 +1,28 @@
-name: 正式站问题 / metisziwei.com issue
-description: 线上网站（metisziwei.com）登录、支付、显示等问题
+name: 正式站问题 / 정식 사이트 문제 / metisziwei.com issue
+description: 线上网站（metisziwei.com）登录、支付、显示等问题 · 원본 서비스(metisziwei.com)의 로그인, 결제, 화면 등 문제
 labels: ["bug"]
 body:
   - type: input
     id: url
     attributes:
-      label: 出问题的页面地址
+      label: 出问题的页面地址 / 문제가 생긴 페이지 주소
       placeholder: https://metisziwei.com/……
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: 怎么出现的
-      placeholder: 点了什么、填了什么、看到什么报错
+      label: 怎么出现的 / 어떻게 생겼는지
+      placeholder: 点了什么、填了什么、看到什么报错 · 무엇을 누르고 입력했는지, 어떤 오류가 보였는지
     validations:
       required: true
   - type: input
     id: env
     attributes:
-      label: 浏览器与系统
-      placeholder: 例：Windows 11 / Chrome 153 / 公司网络开了代理
+      label: 浏览器与系统 / 브라우저와 운영체제
+      placeholder: 例：Windows 11 / Chrome 153 / 公司网络开了代理 · 예：Windows 11 / Chrome 153 / 회사망 프록시 사용
   - type: textarea
     id: screenshot
     attributes:
-      label: 截图
-      description: 请勿贴出手机号、验证码、他人的生辰等隐私信息。
+      label: 截图 / 스크린숏
+      description: 请勿贴出手机号、验证码、他人的生辰等隐私信息。· 전화번호, 인증번호, 타인의 생년월일시 같은 개인정보는 올리지 마세요.

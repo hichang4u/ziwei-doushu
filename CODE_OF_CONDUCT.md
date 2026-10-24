@@ -22,3 +22,5 @@
 ---
 
 **English.** Be respectful and stick to the issue. No harassment, personal attacks, or publishing other people's private information (including their birth data) without consent. Maintainers may edit, hide or remove content that violates this code, and may restrict participation when necessary.
+
+**한국어.** [CODE_OF_CONDUCT.ko.md](./CODE_OF_CONDUCT.ko.md)

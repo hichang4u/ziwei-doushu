@@ -1,19 +1,19 @@
-name: 功能建议 / Feature request
-description: 想要的新功能或改进
+name: 功能建议 / 기능 제안 / Feature request
+description: 想要的新功能或改进 · 원하는 새 기능이나 개선점
 labels: ["enhancement"]
 body:
   - type: textarea
     id: need
     attributes:
-      label: 想解决什么问题
+      label: 想解决什么问题 / 해결하고 싶은 문제
     validations:
       required: true
   - type: textarea
     id: idea
     attributes:
-      label: 你设想的做法
+      label: 你设想的做法 / 생각하는 방법
   - type: textarea
     id: source
     attributes:
-      label: 依据（涉及命理口径时请写）
-      description: 出自哪本书、哪一讲，或哪个排盘软件的哪种设置。没有出处的口径改动我们一般不收。
+      label: 依据（涉及命理口径时请写） / 근거(명리 처리 방식에 관한 것이면 필수)
+      description: 出自哪本书、哪一讲，或哪个排盘软件的哪种设置。没有出处的口径改动我们一般不收。· 어느 책·어느 강의, 또는 어떤 배반 소프트웨어의 어떤 설정인지. 출처 없는 처리 방식 변경은 대체로 받지 않습니다.

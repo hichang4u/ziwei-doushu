@@ -1,5 +1,5 @@
-name: 排盘结果疑问 / Chart result question
-description: 觉得某张盘排得不对？请附上出生信息和对照结果，我们才能逐项核。
+name: 排盘结果疑问 / 배반 결과 문의 / Chart result question
+description: 觉得某张盘排得不对？请附上出生信息和对照结果，我们才能逐项核。· 명반이 틀린 것 같다면 출생 정보와 비교 결과를 함께 적어 주세요.
 title: "[排盘疑问] "
 labels: ["question"]
 body:
@@ -8,58 +8,67 @@ body:
       value: |
         只写「不准」我们没法查。请按下面填完整，我们会逐项对照。
         先看一眼：辅星亮度、闰月归属、晚子时是否换日在各流派本来就不同，这类差异不算 bug，但仍欢迎指出。
+
+        "안 맞는다"만으로는 확인할 수 없습니다. 아래 항목을 모두 채워 주시면 하나씩 대조합니다.
+        보좌성 밝기, 윤달 처리, 야자시에 날짜를 바꾸는지는 유파마다 원래 다르므로 버그가 아니지만, 지적은 환영합니다.
   - type: input
     id: date
     attributes:
-      label: 出生日期（公历）
-      placeholder: 例：1990-05-12
+      label: 出生日期（公历） / 생년월일(양력)
+      placeholder: 例 / 예：1990-05-12
     validations:
       required: true
   - type: input
     id: time
     attributes:
-      label: 出生时间（几点几分）
-      placeholder: 例：08:30
+      label: 出生时间（几点几分） / 출생 시각(몇 시 몇 분)
+      placeholder: 例 / 예：08:30
     validations:
       required: true
   - type: input
     id: place
     attributes:
-      label: 出生地或经度
-      description: 用来换算真太阳时；东西向经度差最多能差出一个时辰。
-      placeholder: 例：浙江杭州 / 东经 120.2°
+      label: 出生地或经度 / 출생지 또는 경도
+      description: 用来换算真太阳时；东西向经度差最多能差出一个时辰。· 진태양시 환산에 씁니다. 동서 경도 차이로 시진이 한 칸까지 달라질 수 있습니다.
+      placeholder: 例：浙江杭州 / 东经 120.2° · 예：서울 / 동경 126.98°
+  - type: input
+    id: korea
+    attributes:
+      label: 韩国出生时的口径 / 한국 출생 시 처리 방식
+      description: 仅韩国出生填写：真太阳时 / KST 钟表，是否勾选「当年夏令时钟表」。· 한국 출생일 때만 — 진태양시 / KST 시각, 「당시 서머타임 시계 기준」 체크 여부.
+      placeholder: 예：진태양시, 서머타임 체크 안 함
   - type: dropdown
     id: gender
     attributes:
-      label: 性别
-      options: ["男", "女"]
+      label: 性别 / 성별
+      options: ["男 / 남", "女 / 여"]
     validations:
       required: true
   - type: textarea
     id: ours
     attributes:
-      label: 本项目排出的结果
-      description: 截图，或贴出 generateChart 输出里相关的那几项。
+      label: 本项目排出的结果 / 이 프로젝트의 결과
+      description: 截图，或贴出 generateChart 输出里相关的那几项。· 스크린숏 또는 generateChart 출력 중 관련 항목.
     validations:
       required: true
   - type: input
     id: ref
     attributes:
-      label: 拿什么对照
-      placeholder: 例：其它排盘软件 / 某本书第几页
+      label: 拿什么对照 / 비교 대상
+      placeholder: 例：其它排盘软件 / 某本书第几页 · 예：다른 배반 소프트웨어 / 어떤 책 몇 쪽
     validations:
       required: true
   - type: textarea
     id: theirs
     attributes:
-      label: 对照结果
-      description: 截图或文字。
+      label: 对照结果 / 비교 결과
+      description: 截图或文字。· 스크린숏 또는 글.
     validations:
       required: true
   - type: textarea
     id: diff
     attributes:
-      label: 具体哪一项不一致
-      placeholder: 例：命宫应在卯，这里排在戌
+      label: 具体哪一项不一致 / 어느 항목이 다른지
+      placeholder: 例：命宫应在卯，这里排在戌 · 예：명궁이 묘궁이어야 하는데 술궁으로 나옴
     validations:
       required: true

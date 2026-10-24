@@ -1,35 +1,37 @@
-name: 程序问题 / Bug report
-description: 代码跑不起来、报错、页面显示异常
+name: 程序问题 / 프로그램 문제 / Bug report
+description: 代码跑不起来、报错、页面显示异常 · 코드가 실행되지 않음, 오류, 화면 이상
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
         先确认：开源版**不含**任何 `/api/*` 后端接口（AI 解读、合盘分析），这些功能出现 404 是预期行为，需要你自己实现，见 README「快速开始」。排盘本身不需要 API Key。
+
+        먼저 확인해 주세요: 공개 버전에는 `/api/*` 백엔드 API(AI 해석, 궁합 분석)가 **없습니다**. 이 기능의 404는 의도된 동작이며 직접 구현해야 합니다(README의 「빠른 시작」 참고). 배반 자체에는 API 키가 필요 없습니다.
   - type: textarea
     id: steps
     attributes:
-      label: 复现步骤
+      label: 复现步骤 / 재현 순서
       placeholder: |
         1. npm ci
         2. npm run dev
-        3. 打开 /chart，选 …… 点 ……
+        3. 打开 /chart，选 …… 点 …… / /chart 를 열고 …… 선택, …… 클릭
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: 期望结果
+      label: 期望结果 / 기대한 결과
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: 实际结果（报错信息、截图）
+      label: 实际结果（报错信息、截图） / 실제 결과(오류 메시지, 스크린숏)
     validations:
       required: true
   - type: input
     id: env
     attributes:
-      label: 运行环境
-      placeholder: 例：macOS 15 / Node 22 / Chrome 140
+      label: 运行环境 / 실행 환경
+      placeholder: 例 / 예：macOS 15 / Node 22 / Chrome 140
