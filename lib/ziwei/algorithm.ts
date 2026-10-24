@@ -21,92 +21,24 @@ import { DEFAULT_LEAP_MONTH } from './school-config';
 // 原配置 yearDivide:'exact'（立春换年）→ 改为 'normal'（正月初一换年）
 // 原因：用户反馈与主流排盘软件的盘"宫位一样、其他完全不一样"，
 // 经诊断（scripts/diff-chart-vs-other.ts）确认根因是换年规则，主流派一律用农历年。
-//
-// ★ 星曜亮度修正（2026-05-08）
-// iztro 默认亮度表与《紫微斗数全书》存在 24 处差异（14 主星 + 6 辅星），
-// 已通过 config.brightness 全量覆写修正。
-// 数组索引从寅起：0=寅 1=卯 2=辰 3=巳 4=午 5=未 6=申 7=酉 8=戌 9=亥 10=子 11=丑
-// 交叉验证来源：紫微取象派全书解读、令东来庙旺表、iztro 官方文档、金标准盘
-// ★ 抽成具名常量（2026-06-11）：供 setBrightnessSchool('default') 显式还原，根治「切流派后全局亮度泄漏」。
-//   必须完整覆盖全部 14 主星——流派表（schoolBrightnessTableToIztroFormat）覆写 14 主星，
-//   若此处缺某主星键，切流派后该星被污染却无键可盖回（实测：武曲/廉贞/巨门/破军 曾缺失）。
-const DEFAULT_BRIGHTNESS: Record<string, string[]> = {
-    //            寅     卯     辰     巳     午     未     申     酉     戌     亥     子     丑
-    // ── 紫微系六星 ──────────────────────────────────────────
-    // 紫微：寅宫 旺→庙（全书：庙于寅午丑未）
-    '紫微': ['庙','旺','得','旺','庙','庙','旺','旺','得','旺','平','庙'],
-    // 天机：辰宫 利→庙、戌宫 利→庙（依「天机庙于子午辰戌」通行庙旺总诀；善本《全书》天机条无逐宫原文，此句系后世总诀转述，非善本直证）
-    '天机': ['得','旺','庙','平','庙','陷','得','旺','庙','平','庙','陷'],
-    // 太阳：午宫 旺→庙（全书：庙于卯午）
-    '太阳': ['旺','庙','旺','旺','庙','得','得','陷','不','陷','陷','不'],
-    // 武曲：iztro 默认与全书一致 ✓
-    // 天同：寅宫 利→旺（全书：旺于子寅申）、午宫 陷→不（全书：不得地于午丑未）
-    '天同': ['旺','平','平','庙','不','不','旺','平','平','庙','旺','不'],
-    // 廉贞：iztro 默认与全书一致 ✓
 
-    // ── 天府系八星 ──────────────────────────────────────────
-    // 天府：辰宫 庙→旺、戌宫 庙→旺（全书：旺于辰戌午酉）
-    '天府': ['庙','得','旺','得','旺','庙','得','旺','旺','得','庙','庙'],
-    // 太阴：寅宫 旺→陷、酉宫 不→旺（全书：庙于亥子丑，旺于酉戌，陷于寅卯辰巳午）★ 重大修正
-    // ★ 2026-06-10 doctrine 复核（用户留言「太阳太阴庙旺有误」触发，详见 docs/audits/taiyin-brightness-review.md）：
-    //   善本《全书·诸星问答论·太阴》逐字（quanshu-juan1-source.ts）：「以卯辰巳午未为陷地，以酉戌亥子丑为得垣」
-    //   → 午宫原值'不'与上行自引出处及善本两源皆抵触，系 05 月校订漏网，校订为'陷'。
-    //   存疑保留：未宫善本作陷地、此表沿用'不'（通行庙旺表多不入陷，流派分歧）；寅宫善本未提，沿用 05 月校订'陷'。
-    '太阴': ['陷','陷','陷','陷','陷','不','利','旺','旺','庙','庙','庙'],
-    // 贪狼：iztro 原始表为 6 位对称构造（平利庙陷旺庙重复），与古籍差异显著，按通行 XD1 表修正
-    // ★ 2026-06-11 复核（二次）：XD1 巳宫=地（表内数值 3），iztro Brightness 无'地'，映射为'平'（同属 normal 区，与金标准盘显示一致）
-    '贪狼': ['不','平','得','平','平','庙','不','平','得','利','平','庙'],
-    // 巨门：iztro 默认与全书一致 ✓（全书各源分歧已复核，iztro 取值合理）
-    // 天相：卯宫 陷→平、酉宫 陷→平（依「天相平于卯酉」通行庙旺总诀；善本《全书》天相条无逐宫原文，且通行四派亮度表此处亦全作「平」，故「平」站得住）
-    '天相': ['庙','平','得','得','庙','得','庙','平','得','得','庙','庙'],
-    // 天梁：卯宫 庙→得、戌宫 庙→得（全书：得地于卯戌）
-    '天梁': ['庙','得','庙','陷','庙','旺','陷','得','得','陷','庙','旺'],
-    // 七杀：酉宫 庙→旺（全书：旺于子午卯酉）
-    '七杀': ['庙','旺','庙','平','旺','庙','庙','旺','庙','平','旺','庙'],
-    // 破军：iztro 默认与全书一致 ✓
-
-    // ── 辅星（六吉六煞）────────────────────────────────────
-    // 文昌：iztro 默认与全书一致 ✓
-    // 文曲：辰宫 得→庙、子宫 得→庙（全书：庙于巳酉丑子辰，共五庙位）
-    '文曲': ['平','旺','庙','庙','陷','旺','得','庙','陷','旺','庙','庙'],
-    // 火星：iztro 默认与全书一致 ✓
-    // 铃星：iztro 错误地复制了火星亮度！全书铃星与火星不同 ★ 重大修正
-    //   辰申 陷→得、未 利→得、丑 得→陷、亥 利→陷（全书：庙寅午戌，地辰巳未申，陷丑亥子）
-    //   酉宫：iztro/主流排盘软件/元亨利贞 均为"得"，从众修正
-    '铃星': ['庙','利','得','得','庙','得','得','得','庙','陷','陷','陷'],
-    // 擎羊：酉宫 陷→旺、子宫 陷→旺（全书：庙辰戌丑未，旺酉子，陷卯午）
-    '擎羊': ['','陷','庙','','陷','庙','','旺','庙','','旺','庙'],
-    // 陀罗：iztro 默认与全书一致 ✓
-
-    // ── 武曲 / 廉贞 / 巨门 / 破军 ───────────────────────────────
-    // 这 4 颗主星 iztro 原生值与《全书》一致，原先未显式覆写（靠 iztro 内置 fallback）。
-    // ★ 2026-06-11 补入原生值（探针 scripts 实测，寅起）：使 DEFAULT 表完整含 14 主星，
-    //   流派切换后 setBrightnessSchool('default') 才能全量盖回、还原默认。
-    '武曲': ['得','利','庙','平','旺','庙','得','利','庙','平','旺','庙'],
-    '廉贞': ['庙','平','利','陷','平','利','庙','平','利','陷','平','利'],
-    '巨门': ['庙','庙','陷','旺','旺','不','庙','庙','陷','旺','旺','不'],
-    '破军': ['得','陷','旺','平','庙','旺','得','陷','旺','平','庙','旺'],
-};
-
-// 模块加载即写入默认亮度表 + 农历正月初一换年规则（astro.config 为全局副作用）
+// 模块加载即写入农历正月初一换年规则（astro.config 为全局副作用，只此一处调用）。
+// 亮度不经 iztro：装配层按流派查 SB 表（schoolStarBrightness），见下方亮度流派切换。
 astro.config({
   yearDivide: 'normal',
-  brightness: DEFAULT_BRIGHTNESS,
 });
 
 // ─── 亮度流派切换（2026-05-12，金标准盘核对后引入）─────────────────────────
-// 默认 = 我们当前的自定义表（基于全书 + 金标准盘交叉验证）
-// 切换 = 调 setBrightnessSchool('qs' | 'xd1' | 'zz' | 'xd2') 覆写为通行四派任一套
-//
-// 注意：astro.config 是全局副作用，每次调用影响所有后续 generateChart
-//       服务端多用户场景下要小心 race condition（chart 生成是同步的，影响小）
+// 默认 = 《斗数全书》QS；可选 'QS' | 'XD1' | 'ZZ' | 'XD2'（'default' 等同 QS）
+// 按次指定：generateChart(info, { brightnessSchool })
+// 改模块默认值：setBrightnessSchool(school)，影响此后所有未传 opts 的 generateChart
 
 export type SchoolBrightnessKind = 'default' | BrightnessSchool;
 
 // ★ 2026-06-20 星曜亮度全套对齐主流排盘口径：全盘亮度改由装配层直接查 SB_[school] 表
 //   （schoolStarBrightness：主星+辅星+煞星+空劫统一一套表/一套映射/子起一索引），
 //   不再走 iztro 的 astro.config 覆写（旧的 DEFAULT_BRIGHTNESS 善本手敲表 + schoolBrightnessTableToIztroFormat
-//   方向读反的映射，都已弃用）。
+//   方向读反的映射，已删除）。
 // ★ 2026-10-20 default = 《斗数全书》QS（站长定：主流排盘默认口径是什么，我们默认就是什么）。
 //   证据：主流排盘软件设置页「重置设置 → 重置为系统默认值」后，星曜亮度停在
 //   「依据斗数全书 (默认)」（截图已存档）；会员发来的金标准盘
@@ -114,8 +46,16 @@ export type SchoolBrightnessKind = 'default' | BrightnessSchool;
 //   现代修订亮度表（第二版）的机器，不是默认口径。流派切换只改此值（同步主辅煞，避免不一致）。
 let currentBrightSchool: BrightnessSchool = 'QS';
 
+function resolveBrightnessSchool(school: SchoolBrightnessKind): BrightnessSchool {
+  return school === 'default' ? 'QS' : school;
+}
+
+/**
+ * 改的是模块级默认值，影响此后所有未传 opts.brightnessSchool 的 generateChart。
+ * 服务端多用户共用一个进程时，请改用 generateChart(info, { brightnessSchool })，按次指定、互不串扰。
+ */
 export function setBrightnessSchool(school: SchoolBrightnessKind): void {
-  currentBrightSchool = school === 'default' ? 'QS' : school;
+  currentBrightSchool = resolveBrightnessSchool(school);
 }
 
 export type LunarMonthPolicy = 'split' | 'next-month' | 'prev-month' | 'origin-month';
@@ -338,7 +278,7 @@ function parseWuxingJu(name: string): number {
 //    既定排法,此处遵用户「对齐默认口径」决定。其余 9 个天干年默认口径与 iztro 本就一致。
 // 回退:删除 generateChart 内 applySchoolKuiyue(...) 调用即恢复 iztro 主流派。
 // ─────────────────────────────────────────────────────────────────────────
-function relocateStar(palaces: Palace[], name: string, targetBranch: number): void {
+function relocateStar(palaces: Palace[], name: string, targetBranch: number, school: BrightnessSchool): void {
   let moved: Star | undefined;
   for (const p of palaces) {
     const i = p.stars.findIndex((s) => s.name === name);
@@ -354,19 +294,19 @@ function relocateStar(palaces: Palace[], name: string, targetBranch: number): vo
   if (target) {
     target.stars.push(moved);
     // ★ 2026-06-20 天魁天钺换位（默认派 KY1）后,亮度仍是 iztro 旧宫位算的（错位）。按新宫地支重算亮度。
-    const rb = schoolStarBrightness(moved.name, targetBranch, currentBrightSchool);
+    const rb = schoolStarBrightness(moved.name, targetBranch, school);
     moved.brightnessRaw = extractRawBrightness(rb);
     moved.brightness = rb ? mapBrightness(rb) : undefined;
   }
 }
 
-function applySchoolKuiyue(palaces: Palace[], yearStemCn: string): void {
+function applySchoolKuiyue(palaces: Palace[], yearStemCn: string, school: BrightnessSchool): void {
   const gan = STEMS.indexOf(yearStemCn); // 甲=0 … 癸=9
   if (gan < 0) return;
   const row = SCHOOL_AX.KY_ARR1[gan + 1]; // KY 表「甲=1」起;子起一编码
   if (!row) return;
-  relocateStar(palaces, '天魁', row[0] - 1); // 子起一(子=1) → BRANCHES 索引(子=0)
-  relocateStar(palaces, '天钺', row[1] - 1);
+  relocateStar(palaces, '天魁', row[0] - 1, school); // 子起一(子=1) → BRANCHES 索引(子=0)
+  relocateStar(palaces, '天钺', row[1] - 1, school);
 }
 
 /**
@@ -379,10 +319,10 @@ export function schoolDahaoBranch(yearBranch: number): number {
   return yearBranch % 2 === 0 ? (suiPo + 1) % 12 : (suiPo + 11) % 12;
 }
 
-function pushNatalStar(palaces: Palace[], branch: number, name: string): void {
+function pushNatalStar(palaces: Palace[], branch: number, name: string, school: BrightnessSchool): void {
   const target = palaces.find((p) => p.branch === branch);
   if (!target || target.stars.some((s) => s.name === name)) return;
-  const rb = schoolStarBrightness(name, branch, currentBrightSchool);
+  const rb = schoolStarBrightness(name, branch, school);
   target.stars.push({
     name,
     type: mapStarType(name, ''),
@@ -391,8 +331,8 @@ function pushNatalStar(palaces: Palace[], branch: number, name: string): void {
   });
 }
 
-function applySchoolDahao(palaces: Palace[], yearBranch: number): void {
-  pushNatalStar(palaces, schoolDahaoBranch(yearBranch), '大耗');
+function applySchoolDahao(palaces: Palace[], yearBranch: number, school: BrightnessSchool): void {
+  pushNatalStar(palaces, schoolDahaoBranch(yearBranch), '大耗', school);
 }
 
 /**
@@ -401,7 +341,7 @@ function applySchoolDahao(palaces: Palace[], yearBranch: number): void {
  * 阳干截空落阳宫、副截落阴宫；阴干对调。iztro 一律截路=阳宫、空亡=阴宫，阴干要换宫。
  * 2026-08-14 金标准盘：辛丑巳截空/辰副截，己亥酉截空/申副截，乙巳未截空/午副截。
  */
-function applySchoolJiekong(palaces: Palace[], yearStem: number): void {
+function applySchoolJiekong(palaces: Palace[], yearStem: number, school: BrightnessSchool): void {
   for (const p of palaces) {
     for (const s of p.stars) {
       if (s.name === '截路') s.name = '截空';
@@ -409,7 +349,7 @@ function applySchoolJiekong(palaces: Palace[], yearStem: number): void {
       else continue;
       // ★ 2026-10-20 改名后按新名字补亮度：iztro 原名查不到亮度，阳干年（不换宫、下面直接 return）
       //   截空 / 副截一直留白，主流排盘默认口径是有亮度的（真盘：丙寅 辰截空=陷、巳副截=庙）。阴干换宫后下面再按新宫重算。
-      const rb = schoolStarBrightness(s.name, p.branch, currentBrightSchool);
+      const rb = schoolStarBrightness(s.name, p.branch, school);
       s.brightness = rb ? mapBrightness(rb) : undefined;
       s.brightnessRaw = extractRawBrightness(rb);
     }
@@ -423,8 +363,8 @@ function applySchoolJiekong(palaces: Palace[], yearStem: number): void {
   if (!jieStar || !fuStar) return;
   jie.stars = jie.stars.filter((s) => s !== jieStar);
   fu.stars = fu.stars.filter((s) => s !== fuStar);
-  const rbJ = schoolStarBrightness('截空', fu.branch, currentBrightSchool);
-  const rbF = schoolStarBrightness('副截', jie.branch, currentBrightSchool);
+  const rbJ = schoolStarBrightness('截空', fu.branch, school);
+  const rbF = schoolStarBrightness('副截', jie.branch, school);
   jieStar.brightness = rbJ ? mapBrightness(rbJ) : undefined;
   jieStar.brightnessRaw = extractRawBrightness(rbJ);
   fuStar.brightness = rbF ? mapBrightness(rbF) : undefined;
@@ -434,16 +374,20 @@ function applySchoolJiekong(palaces: Palace[], yearStem: number): void {
 }
 
 /** 旬空成对（子丑/寅卯/辰巳/午未/申酉/戌亥）。副旬落在另一支：旬空阳支+1、阴支−1。 */
-function applySchoolFuxun(palaces: Palace[]): void {
+function applySchoolFuxun(palaces: Palace[], school: BrightnessSchool): void {
   const xun = palaces.find((p) => p.stars.some((s) => s.name === '旬空'));
   if (!xun) return;
   const fu = xun.branch % 2 === 0 ? (xun.branch + 1) % 12 : (xun.branch + 11) % 12;
-  pushNatalStar(palaces, fu, '副旬');
+  pushNatalStar(palaces, fu, '副旬', school);
 }
 
 export function generateChart(
   birthInfo: BirthInfo,
-  opts?: { leapMonth?: LunarMonthPolicy },
+  opts?: {
+    leapMonth?: LunarMonthPolicy;
+    /** 本次排盘的亮度流派；不传则用 setBrightnessSchool 设的模块默认值 */
+    brightnessSchool?: SchoolBrightnessKind;
+  },
 ): ZiweiChart {
   const { year, month, day, hour, gender } = birthInfo;
   if (!Number.isInteger(hour) || hour < 0 || hour > 11) {
@@ -459,6 +403,8 @@ export function generateChart(
     throw new RangeError(`solar date does not exist: ${year}-${month}-${day}`);
   }
   const iztroGender = gender === 'male' ? '男' : '女';
+  // 开头取一次，整张盘同一流派；后续不再读模块级 currentBrightSchool
+  const brightSchool = opts?.brightnessSchool ? resolveBrightnessSchool(opts.brightnessSchool) : currentBrightSchool;
 
   // 闰月处理（流派分歧：归本月 / 归下月 / 前后半分）
   // 默认 = DEFAULT_LEAP_MONTH（2026-09-05 起 split：主流排盘默认口径「月中分界」，150 组金标准盘对照验证；倪师派归下月可经流派抽屉切 next-month）
@@ -501,8 +447,8 @@ export function generateChart(
     const allStars: Star[] = [
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(p.majorStars ?? []).map((s: any) => {
-        // ★ 2026-06-20 全套对齐主流排盘口径:亮度统一查 SB_[currentBrightSchool] 表(全书派默认),不再用 iztro/善本表
-        const rb = schoolStarBrightness(s.name as string, branch, currentBrightSchool);
+        // ★ 2026-06-20 全套对齐主流排盘口径:亮度统一查 SB_[brightSchool] 表(全书派默认),不再用 iztro/善本表
+        const rb = schoolStarBrightness(s.name as string, branch, brightSchool);
         return {
           name:          s.name as string,
           type:          'major' as const,
@@ -514,7 +460,7 @@ export function generateChart(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(p.minorStars ?? []).map((s: any) => {
         // ★ 2026-06-20 辅星(左辅右弼天魁天钺禄存天马) + 煞星(火铃羊陀空劫) 同走 SB 表(同一套映射/索引)
-        const rb = schoolStarBrightness(s.name as string, branch, currentBrightSchool);
+        const rb = schoolStarBrightness(s.name as string, branch, brightSchool);
         return {
           name:          s.name as string,
           type:          mapStarType(s.name as string, s.type as string),
@@ -530,7 +476,7 @@ export function generateChart(
       ...(p.adjectiveStars ?? []).map((s: any) => {
         // ★ 2026-06-20 杂耀亮度对齐主流排盘口径：行号 = SB 亮度表 ID（SCHOOL_STAR_ID_TO_NAME 反查），
         //   落宫沿用 iztro（与金标准盘一致），金标准盘 24/24 验证。名字不在表里的杂耀 → undefined（留白，同现状）。
-        const rb = schoolStarBrightness(s.name as string, branch, currentBrightSchool);
+        const rb = schoolStarBrightness(s.name as string, branch, brightSchool);
         return {
           name:          s.name as string,
           type:          mapStarType(s.name as string, (s.type as string) ?? ''),
@@ -566,7 +512,7 @@ export function generateChart(
 
   // ★ 天魁天钺对齐默认派(KY1)——用户决策 2026-05-30,实测仅辛年与现状不同(见上方函数注释)
   const yearStemCn = (astrolabe.rawDates?.chineseDate?.yearly?.[0]) as string | undefined;
-  if (yearStemCn) applySchoolKuiyue(palaces, yearStemCn);
+  if (yearStemCn) applySchoolKuiyue(palaces, yearStemCn, brightSchool);
 
   // ── 当前年龄 & 大限 ──
   // ★ 用 iztro horoscope.age.nominalAge（中国虚岁口径，与 daXianAge 范围一致）
@@ -634,9 +580,9 @@ export function generateChart(
   const lunarInfo = getLunarInfo(year, month, day, hour, leapMode);
 
   // ★ 2026-08-14 金标准盘核对：截空/副截阴干对调 + 年支大耗 + 旬空成对副旬
-  applySchoolJiekong(palaces, lunarInfo.yearStem);
-  applySchoolDahao(palaces, lunarInfo.yearBranch);
-  applySchoolFuxun(palaces);
+  applySchoolJiekong(palaces, lunarInfo.yearStem, brightSchool);
+  applySchoolDahao(palaces, lunarInfo.yearBranch, brightSchool);
+  applySchoolFuxun(palaces, brightSchool);
 
   // ── 命主 / 身主 / 阴阳性别 ──
   const mingZhu = calcMingZhu(mingGongBranch >= 0 ? mingGongBranch : 0);

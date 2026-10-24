@@ -245,30 +245,6 @@ export const BRIGHTNESS_NUM_TO_CN_BY_SCHOOL: Record<BrightnessSchool, Record<num
   ZZ: BRIGHTNESS_NUM_TO_CN_5, XD2: BRIGHTNESS_NUM_TO_CN_5,
 };
 
-/**
- * 把数字亮度表（按地支 1=寅...12=丑）转成 iztro 兼容的中文亮度数组
- * iztro 亮度数组顺序：[寅,卯,辰,巳,午,未,申,酉,戌,亥,子,丑]
- *
- * 返回 14 主星名 → 12 元素中文数组的 map
- */
-export function schoolBrightnessTableToIztroFormat(
-  school: BrightnessSchool,
-): Record<string, string[]> {
-  const table = getSchoolBrightnessTable(school);
-  const starIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-  const result: Record<string, string[]> = {};
-
-  for (const sid of starIds) {
-    const row = table[sid];
-    if (!row) continue;
-    const name = SCHOOL_STAR_ID_TO_NAME[sid];
-    if (!name) continue;
-    // 表内索引 1-12 (寅起一)；iztro 索引 0-11 (寅起一) — 直接 row.slice(1) 即可
-    result[name] = row.slice(1, 13).map((v) => BRIGHTNESS_NUM_TO_CN[v] ?? '');
-  }
-  return result;
-}
-
 // ─── 星曜亮度（全星：主星 + 辅星 + 煞星 + 空劫，凡 SCHOOL_STAR_ID_TO_NAME 收录的）──────────
 // ★ 2026-06-20 全套对齐主流排盘口径：之前默认主星用手敲善本表、辅星用 XD1，都对不齐金标准盘。
 //   真相 = 主流默认亮度流派 = 全书派（设置页实证），数据就在 SB_QS 表（整理正确），
