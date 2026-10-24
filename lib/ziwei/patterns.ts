@@ -15,7 +15,7 @@
  *  - 倪师《天纪》紫微斗数讲义
  */
 
-import 'server-only';
+// 开源版 /chart 在浏览器端起盘并展示格局（PatternsCard），故不再标 server-only
 import type { ZiweiChart, Palace, Star } from './types';
 
 // ────────────────── 类型 ──────────────────

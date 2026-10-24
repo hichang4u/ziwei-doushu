@@ -5,6 +5,8 @@
  */
 import { zh, type Messages } from './messages/zh';
 import { ko } from './messages/ko';
+import { zhPrompts, type InsightPrompts } from './prompts/zh';
+import { koPrompts } from './prompts/ko';
 import {
   TERMS_KO, STEMS_KO, BRANCHES_KO, HANGUL_COLLISIONS, type KoTerm,
 } from './terms-ko';
@@ -18,6 +20,9 @@ export const LOCALES: Locale[] = ['zh', 'ko'];
 export const DEFAULT_TERM_STYLE: TermStyle = 'hangul-hanja';
 
 export const MESSAGES: Record<Locale, Messages> = { zh, ko };
+
+/** AI 解读提示词：决定 AI 的作答语言与结构 */
+export const PROMPTS: Record<Locale, InsightPrompts> = { zh: zhPrompts, ko: koPrompts };
 
 export const HTML_LANG: Record<Locale, string> = { zh: 'zh-CN', ko: 'ko' };
 
@@ -38,6 +43,11 @@ function display(zhName: string, t: KoTerm | undefined, locale: Locale, style: T
 /** 星曜 / 宫名 / 五行局 / 四化 / 盘面标记 */
 export function formatTerm(zhName: string, locale: Locale, style: TermStyle): TermDisplay {
   return display(zhName, TERMS_KO[zhName], locale, style, HANGUL_COLLISIONS.has(zhName));
+}
+
+/** 不在引擎术语表里的韩文术语（如格局名）按当前写法格式化 */
+export function formatKoTerm(t: KoTerm, style: TermStyle): TermDisplay {
+  return display(t.hanja, t, 'ko', style, false);
 }
 
 /** 干支（单字或两字组合，如「甲子」） */

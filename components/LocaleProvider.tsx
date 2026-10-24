@@ -1,10 +1,11 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
-  MESSAGES, HTML_LANG, DEFAULT_TERM_STYLE, formatTerm, formatGanzhi, termText,
+  MESSAGES, HTML_LANG, DEFAULT_TERM_STYLE, formatTerm, formatGanzhi, formatKoTerm, termText,
   isLocale, isTermStyle, type Locale, type TermStyle, type TermDisplay,
 } from '@/lib/i18n';
 import type { Messages } from '@/lib/i18n/messages/zh';
+import type { KoTerm } from '@/lib/i18n/terms-ko';
 
 const LOCALE_KEY = 'ziwei-locale';
 const TERM_STYLE_KEY = 'ziwei-term-style';
@@ -21,6 +22,8 @@ interface LocaleContextValue {
   ganzhi: (text: string) => TermDisplay;
   /** 术语串成纯文本 */
   termStr: (zhName: string) => string;
+  /** 引擎术语表以外的韩文术语（格局名等）串成纯文本，仅韩文界面使用 */
+  koTermStr: (t: KoTerm) => string;
 }
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
@@ -68,6 +71,7 @@ export function LocaleProvider({ children, initialLocale }: {
     term: (zhName) => formatTerm(zhName, locale, termStyle),
     ganzhi: (text) => formatGanzhi(text, locale, termStyle),
     termStr: (zhName) => termText(formatTerm(zhName, locale, termStyle)),
+    koTermStr: (t) => termText(formatKoTerm(t, termStyle)),
   }), [locale, termStyle, setLocale, setTermStyle]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

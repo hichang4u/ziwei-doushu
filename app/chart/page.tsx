@@ -3,10 +3,12 @@ import { useState } from 'react';
 import BirthForm from '@/components/BirthForm';
 import ChartBoard from '@/components/ChartBoard';
 import InsightPanel from '@/components/InsightPanel';
+import PatternsCard from '@/components/PatternsCard';
+import StarDetailPanel from '@/components/StarDetailPanel';
 import TimeNav, { type TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
 import { useLocale } from '@/components/LocaleProvider';
-import type { BirthInfo, ZiweiChart, Palace } from '@/lib/ziwei/types';
+import type { BirthInfo, ZiweiChart, Palace, Star } from '@/lib/ziwei/types';
 
 /**
  * 命盘页 —— 开源版「排盘引擎 Demo」
@@ -21,6 +23,7 @@ import type { BirthInfo, ZiweiChart, Palace } from '@/lib/ziwei/types';
 export default function ChartPage() {
   const [chart, setChart] = useState<ZiweiChart | null>(null);
   const [selectedPalace, setSelectedPalace] = useState<Palace | null>(null);
+  const [selectedStar, setSelectedStar] = useState<{ star: Star; palaceName: string } | null>(null);
   const [view, setView] = useState<TimeView>('mingpan');
   const [liunianYear, setLiunianYear] = useState(() => new Date().getFullYear());
   const { m } = useLocale();
@@ -45,7 +48,7 @@ export default function ChartPage() {
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px' }}>
       <button
         type="button"
-        onClick={() => { setChart(null); setSelectedPalace(null); }}
+        onClick={() => { setChart(null); setSelectedPalace(null); setSelectedStar(null); }}
         style={{
           marginBottom: 16, padding: '6px 14px', cursor: 'pointer',
           border: '1px solid #ccc', borderRadius: 8, background: 'transparent',
@@ -69,8 +72,23 @@ export default function ChartPage() {
           gap: 20, marginTop: 16, alignItems: 'start',
         }}
       >
-        <ChartBoard chart={chart} onPalaceSelect={setSelectedPalace} />
-        <InsightPanel chart={chart} selectedPalace={selectedPalace} />
+        <div>
+          <ChartBoard
+            chart={chart}
+            onPalaceSelect={setSelectedPalace}
+            onStarSelect={(star, palace) => setSelectedStar({ star, palaceName: palace.name })}
+          />
+          {/* 规则格局识别：不依赖 AI 接口，开源版也能看到 */}
+          <div style={{ marginTop: 16 }}><PatternsCard chart={chart} /></div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <StarDetailPanel
+            star={selectedStar?.star ?? null}
+            palaceName={selectedStar?.palaceName}
+            onClose={() => setSelectedStar(null)}
+          />
+          <InsightPanel chart={chart} selectedPalace={selectedPalace} />
+        </div>
       </div>
     </main>
   );
