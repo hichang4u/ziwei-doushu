@@ -1,17 +1,23 @@
+import { Msg, OnlyIn } from '@/components/I18nText';
+import LocaleMeta from '@/components/LocaleMeta';
+import { TermsKo } from '@/lib/i18n/legal-ko';
+
 export const metadata = { title: '服务条款 · 紫微命盘', description: '紫微命盘服务条款与用户协议' };
 
 export default function TermsPage() {
   return (
     <>
+      <LocaleMeta ko={{ title: '이용약관 · 자미 명반' }} />
       <header style={{ position: 'sticky', top: 0, zIndex: 50, background: 'var(--bg-0)', borderBottom: '1px solid var(--bdr)', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
         <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--tx-3)', textDecoration: 'none' }}>
           <span style={{ fontSize: '16px' }}>‹</span>
-          <span>返回首页</span>
+          <span><Msg k="legal.backHome" /></span>
         </a>
         <div style={{ width: '1px', height: '20px', background: 'var(--bdr-med)' }} />
-        <span style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.2em' }}>紫微命盘</span>
+        <span style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.2em' }}><Msg k="legal.brand" /></span>
       </header>
       <main style={{ maxWidth: 800, margin: '0 auto', padding: '60px 24px 80px', color: 'var(--tx-1)', lineHeight: 1.8 }}>
+        <OnlyIn locale="zh">
         <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 8 }}>服务条款</h1>
         <p style={{ fontSize: 12, color: 'var(--tx-3)', marginBottom: 32 }}>最后更新：2026年4月</p>
 
@@ -51,8 +57,11 @@ export default function TermsPage() {
       <h2 style={{ fontSize: 18, marginTop: 32, marginBottom: 12 }}>7. 联系方式</h2>
       <p>如有疑问，请通过本平台公布的客服微信 / 邮箱联系。</p>
 
+        </OnlyIn>
+        <OnlyIn locale="ko"><TermsKo /></OnlyIn>
+
         <p style={{ marginTop: 48, fontSize: 12, color: 'var(--tx-3)' }}>
-          <a href="/privacy" style={{ color: 'var(--ac)' }}>隐私政策</a> · <a href="/" style={{ color: 'var(--ac)' }}>返回首页</a>
+          <a href="/privacy" style={{ color: 'var(--ac)' }}><Msg k="legal.privacy" /></a> · <a href="/" style={{ color: 'var(--ac)' }}><Msg k="legal.backHome" /></a>
         </p>
       </main>
     </>

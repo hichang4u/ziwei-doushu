@@ -26,6 +26,16 @@ export const PROMPTS: Record<Locale, InsightPrompts> = { zh: zhPrompts, ko: koPr
 
 export const HTML_LANG: Record<Locale, string> = { zh: 'zh-CN', ko: 'ko' };
 
+export const LOCALE_STORAGE_KEY = 'ziwei-locale';
+export const TERM_STYLE_STORAGE_KEY = 'ziwei-term-style';
+
+/**
+ * <head> 内联脚本：页面是静态导出的中文 HTML，韩文要等水合后才切换，首帧会闪一下中文。
+ * 在首帧前按与 LocaleProvider 相同的规则判定语言；判定为韩文时先改 html lang 并隐藏 body
+ * （html.locale-pending，见 globals.css），LocaleProvider 切到韩文后移除；1.5 秒兜底，避免水合失败时一直空白。
+ */
+export const LOCALE_BOOT_SCRIPT = `(function(){try{var s=localStorage.getItem('${LOCALE_STORAGE_KEY}');var ko=s==='ko'||(s!=='zh'&&(navigator.language||'').toLowerCase().indexOf('ko')===0);if(ko){var d=document.documentElement;d.lang='ko';d.classList.add('locale-pending');setTimeout(function(){d.classList.remove('locale-pending')},1500);}}catch(e){}})();`;
+
 /** 术语显示结果：main 为主文字，sub 为附注的汉字（UI 可用小字或括号呈现） */
 export interface TermDisplay {
   main: string;

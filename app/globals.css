@@ -434,3 +434,6 @@ body {
    select 本身是半透明底 + 浅色字，Windows 上原生下拉列表是白底，浅灰字配白底看不清（#14） */
 [data-theme="dark"] select { color-scheme: dark; }
 [data-theme="dark"] select option { background-color: var(--bg-2); color: var(--tx-1); }
+
+/* 韩文首帧：LOCALE_BOOT_SCRIPT 判定为韩文时先隐藏，LocaleProvider 切到韩文后移除（lib/i18n/index.ts） */
+html.locale-pending body { visibility: hidden; }

@@ -7,6 +7,7 @@ import { generateChart as buildChart } from '@/lib/ziwei/algorithm';
 import type { BirthInfo, ZiweiChart } from '@/lib/ziwei/types';
 import { useTheme } from '@/components/ThemeProvider';
 import { useLocale } from '@/components/LocaleProvider';
+import LocaleMeta from '@/components/LocaleMeta';
 
 // ─── AiContent 渲染器（与 InsightPanel 一致）────────────────
 function AiContent({ text, streaming }: { text: string; streaming?: boolean }) {
@@ -165,6 +166,7 @@ export default function HemingPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-0)' }}>
+      <LocaleMeta ko={{ title: '자미두수 궁합 · 자미 명반', description: '두 사람의 출생 정보로 명반을 비교해 인연과 관계를 분석합니다.' }} />
       {/* 顶栏 */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,

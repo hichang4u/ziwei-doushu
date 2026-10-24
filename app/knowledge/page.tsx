@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ALL_STARS, ALL_TOPICS, getKnowledge, STAR_BRIEF_SEO, STAR_TO_SLUG } from '@/lib/seo/knowledge';
 import { TOPIC_LABEL } from '@/lib/ziwei/db-analysis';
 import { Msg, Bi, KoTermText } from '@/components/I18nText';
+import LocaleMeta from '@/components/LocaleMeta';
 import { MAJOR_STARS_KO } from '@/lib/i18n/terms-ko';
 import { STAR_BRIEF_SEO_KO } from '@/lib/i18n/knowledge-ko';
 
@@ -21,6 +22,7 @@ export default function KnowledgeHomePage() {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+      <LocaleMeta ko={{ title: '자미두수 명리 백과 · 주성 14 × 궁 13 · 니하이샤 정통 체계', description: '니하이샤 『천기』 체계와 고전 『자미두수전집』 『골수부』를 바탕으로 엮은 자미두수 명리 백과입니다.' }} />
       {/* 顶栏 */}
       <div className="px-6 py-4 flex items-center justify-between"
         style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>

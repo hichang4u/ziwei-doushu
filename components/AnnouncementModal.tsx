@@ -1,16 +1,59 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocale } from './LocaleProvider';
 
 // 公告版本号——以后想再弹新公告，改这里就行（旧版 key 失效，新版重新弹一次）
 const ANNOUNCEMENT_VERSION = '2026-05-01';
 const STORAGE_KEY = `announcement_seen_${ANNOUNCEMENT_VERSION}`;
+
+// 公告文案：zh 由原 JSX 逐字迁出；ko 为韩文译文
+const TEXT = {
+  zh: {
+    title: '致正在使用这个平台的你',
+    close: '关闭',
+    bannerTag: 'LIMITED TIME · 限时回馈',
+    bannerDate: '5 月 1 日 — 5 月 8 日',
+    bannerBody: '平台全部功能 + AI 提问 全部免费开放',
+    p1: '说实话，我真的没想到会有这么大的流量。',
+    p2: '最开始做这个平台，我的初心其实很简单：在 AI 时代，把倪师这套原本复杂、门槛很高的体系，尽量做得更简单、更高效、更容易理解。',
+    p3: '不一定每个人都要先学很久、看很多书，才能接触这些内容。我们希望通过这个平台，让大家用更轻松的方式，获得一些对自我、人生阶段、选择方向的参考和启发。',
+    quote: '倪师曾说过一句话：人怎么可能发明出完全没有用的东西呢？',
+    p4: '我一直觉得，易经如此，紫微斗数也是如此。它们真正有价值的地方，不是让人被某个结果困住，而是让我们更早看见自己的性格惯性、人生课题和选择方向。看见之后，才有机会调整；理解之后，才有机会变得更好。',
+    p5: '至于那些说\u201c你当下在看这些，其实也是命运的一部分\u201d之类的话，我就不多评价了。',
+    p6: '这几天账号被小红书抬走了，',
+    p6Strong: '5 月 3 号开始恢复正常更新。',
+    p7: '最后，真心祝愿大家都能越来越了解自己，越来越爱自己，也越来越有能力爱身边的人。',
+    sign: '——谢谢大家 🙏',
+    ok: '我知道了',
+  },
+  ko: {
+    title: '이 플랫폼을 쓰고 있는 당신에게',
+    close: '닫기',
+    bannerTag: 'LIMITED TIME · 기간 한정 혜택',
+    bannerDate: '5월 1일 — 5월 8일',
+    bannerBody: '플랫폼 전체 기능 + AI 질문 모두 무료 개방',
+    p1: '솔직히 이렇게 많은 분이 찾아오실 줄은 정말 몰랐습니다.',
+    p2: '처음 이 플랫폼을 만들 때 제 초심은 단순했습니다. AI 시대에, 원래 복잡하고 문턱이 높은 니하이샤(倪海厦) 선생의 체계를 최대한 더 쉽고, 더 효율적이고, 더 이해하기 쉽게 만드는 것이었습니다.',
+    p3: '누구나 오래 공부하고 많은 책을 읽어야만 이런 내용을 접할 수 있는 것은 아닙니다. 이 플랫폼을 통해 더 가벼운 방식으로 자신과 인생의 단계, 선택의 방향에 대한 참고와 영감을 얻으시길 바랍니다.',
+    quote: '니 선생은 이런 말을 한 적이 있습니다. 사람이 어떻게 완전히 쓸모없는 것을 발명할 수 있겠는가?',
+    p4: '저는 늘 역경이 그렇고 자미두수도 그렇다고 생각해 왔습니다. 이것들의 진짜 가치는 사람을 어떤 결과에 가두는 데 있지 않고, 자신의 성격 습관, 인생 과제, 선택의 방향을 더 일찍 보게 하는 데 있습니다. 보고 나서야 고칠 기회가 생기고, 이해하고 나서야 더 나아질 기회가 생깁니다.',
+    p5: '\u201c지금 이것을 보고 있는 것도 사실 운명의 일부\u201d라는 식의 말에 대해서는 따로 평하지 않겠습니다.',
+    p6: '요 며칠 계정이 샤오훙수(小紅書)에서 정지되었습니다. ',
+    p6Strong: '5월 3일부터 정상적으로 업데이트를 재개합니다.',
+    p7: '끝으로, 모두가 자신을 점점 더 잘 알고, 점점 더 자신을 사랑하고, 곁에 있는 사람을 사랑할 힘도 점점 더 커지기를 진심으로 바랍니다.',
+    sign: '——모두 감사합니다 🙏',
+    ok: '확인했습니다',
+  },
+};
 
 export default function AnnouncementModal() {
   // 默认不开，client 端 useEffect 检查 localStorage 后立即决定是否弹出。
   // 没看过 → 立即覆盖首页；看过 → 不再弹。
   const [open, setOpen] = useState(false);
   const [decided, setDecided] = useState(false); // hydration 完成标志
+  const { locale } = useLocale();
+  const t = TEXT[locale];
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -88,11 +131,11 @@ export default function AnnouncementModal() {
                 A LETTER TO USERS
               </div>
               <h2 style={{ fontSize: '19px', fontWeight: 700, color: '#3d2f10', letterSpacing: '0.08em', margin: 0 }}>
-                致正在使用这个平台的你
+                {t.title}
               </h2>
               <button
                 onClick={close}
-                aria-label="关闭"
+                aria-label={t.close}
                 style={{
                   position: 'absolute', top: '14px', right: '16px',
                   width: '28px', height: '28px',
@@ -117,12 +160,12 @@ export default function AnnouncementModal() {
               textAlign: 'center',
             }}>
               <div style={{ fontSize: '10px', letterSpacing: '0.3em', color: '#c45a2d', marginBottom: '4px', fontWeight: 600 }}>
-                LIMITED TIME · 限时回馈
+                {t.bannerTag}
               </div>
               <div style={{ fontSize: '14px', color: '#8b3a1a', fontWeight: 600, lineHeight: 1.6 }}>
-                <span style={{ fontSize: '16px', color: '#c45a2d', fontWeight: 700 }}>5 月 1 日 — 5 月 8 日</span>
+                <span style={{ fontSize: '16px', color: '#c45a2d', fontWeight: 700 }}>{t.bannerDate}</span>
                 <br />
-                平台全部功能 + AI 提问 全部免费开放
+                {t.bannerBody}
               </div>
             </div>
 
@@ -136,13 +179,13 @@ export default function AnnouncementModal() {
               flex: 1,
             }}>
               <p style={{ margin: '0 0 12px' }}>
-                说实话，我真的没想到会有这么大的流量。
+                {t.p1}
               </p>
               <p style={{ margin: '0 0 12px' }}>
-                最开始做这个平台，我的初心其实很简单：在 AI 时代，把倪师这套原本复杂、门槛很高的体系，尽量做得更简单、更高效、更容易理解。
+                {t.p2}
               </p>
               <p style={{ margin: '0 0 12px' }}>
-                不一定每个人都要先学很久、看很多书，才能接触这些内容。我们希望通过这个平台，让大家用更轻松的方式，获得一些对自我、人生阶段、选择方向的参考和启发。
+                {t.p3}
               </p>
               <p style={{
                 margin: '0 0 12px',
@@ -153,22 +196,22 @@ export default function AnnouncementModal() {
                 fontStyle: 'italic',
                 color: '#7a5e2a',
               }}>
-                倪师曾说过一句话：人怎么可能发明出完全没有用的东西呢？
+                {t.quote}
               </p>
               <p style={{ margin: '0 0 12px' }}>
-                我一直觉得，易经如此，紫微斗数也是如此。它们真正有价值的地方，不是让人被某个结果困住，而是让我们更早看见自己的性格惯性、人生课题和选择方向。看见之后，才有机会调整；理解之后，才有机会变得更好。
+                {t.p4}
               </p>
               <p style={{ margin: '0 0 12px' }}>
-                至于那些说&ldquo;你当下在看这些，其实也是命运的一部分&rdquo;之类的话，我就不多评价了。
+                {t.p5}
               </p>
               <p style={{ margin: '0 0 12px' }}>
-                这几天账号被小红书抬走了，<strong style={{ color: '#c45a2d' }}>5 月 3 号开始恢复正常更新。</strong>
+                {t.p6}<strong style={{ color: '#c45a2d' }}>{t.p6Strong}</strong>
               </p>
               <p style={{ margin: '0 0 16px', color: '#3d2f10', fontWeight: 500 }}>
-                最后，真心祝愿大家都能越来越了解自己，越来越爱自己，也越来越有能力爱身边的人。
+                {t.p7}
               </p>
               <p style={{ margin: 0, textAlign: 'right', fontSize: '13px', color: '#7a5e2a' }}>
-                ——谢谢大家 🙏
+                {t.sign}
               </p>
             </div>
 
@@ -197,7 +240,7 @@ export default function AnnouncementModal() {
                   boxShadow: '0 4px 12px rgba(184,146,42,0.3)',
                 }}
               >
-                我知道了
+                {t.ok}
               </button>
             </div>
           </motion.div>

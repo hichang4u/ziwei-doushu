@@ -177,6 +177,12 @@ export const zh = {
     basis: '基于倪海厦《天纪》体系编纂 · 含古籍引证',
     fourteen: '十四主星',
   },
+  legal: {
+    backHome: '返回首页',
+    brand: '紫微命盘',
+    privacy: '隐私政策',
+    terms: '服务条款',
+  },
   heming: {
     back: '返回',
     navTitle: '合盘分析',

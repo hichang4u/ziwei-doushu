@@ -1,14 +1,15 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
-  MESSAGES, HTML_LANG, DEFAULT_TERM_STYLE, formatTerm, formatGanzhi, formatKoTerm, termText,
+  MESSAGES, HTML_LANG, DEFAULT_TERM_STYLE, LOCALE_STORAGE_KEY, TERM_STYLE_STORAGE_KEY,
+  formatTerm, formatGanzhi, formatKoTerm, termText,
   isLocale, isTermStyle, type Locale, type TermStyle, type TermDisplay,
 } from '@/lib/i18n';
 import type { Messages } from '@/lib/i18n/messages/zh';
 import type { KoTerm } from '@/lib/i18n/terms-ko';
 
-const LOCALE_KEY = 'ziwei-locale';
-const TERM_STYLE_KEY = 'ziwei-term-style';
+const LOCALE_KEY = LOCALE_STORAGE_KEY;
+const TERM_STYLE_KEY = TERM_STYLE_STORAGE_KEY;
 
 interface LocaleContextValue {
   locale: Locale;
@@ -50,6 +51,8 @@ export function LocaleProvider({ children, initialLocale }: {
 
   useEffect(() => {
     document.documentElement.lang = HTML_LANG[locale];
+    // LOCALE_BOOT_SCRIPT 判定为韩文时隐藏了 body，切到韩文并提交后再显示
+    if (locale === 'ko') document.documentElement.classList.remove('locale-pending');
   }, [locale]);
 
   const setLocale = useCallback((l: Locale) => {

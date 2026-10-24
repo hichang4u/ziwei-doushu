@@ -8,6 +8,7 @@ import StarDetailPanel from '@/components/StarDetailPanel';
 import TimeNav, { type TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
 import { useLocale } from '@/components/LocaleProvider';
+import LocaleMeta from '@/components/LocaleMeta';
 import type { BirthInfo, ZiweiChart, Palace, Star } from '@/lib/ziwei/types';
 
 /**
@@ -32,6 +33,7 @@ export default function ChartPage() {
   if (!chart) {
     return (
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '48px 20px' }}>
+        <LocaleMeta ko={{ title: '자미두수 배반 · 자미 명반' }} />
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>{m.chartPage.title}</h1>
         <p style={{ color: '#888', marginBottom: 32, fontSize: 14, lineHeight: 1.7 }}>
           {m.chartPage.intro}
@@ -46,6 +48,7 @@ export default function ChartPage() {
   // ── 已起盘：命盘 + 解读 ──
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px' }}>
+      <LocaleMeta ko={{ title: '자미두수 배반 · 자미 명반' }} />
       <button
         type="button"
         onClick={() => { setChart(null); setSelectedPalace(null); setSelectedStar(null); }}

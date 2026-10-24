@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import { searchClassics, getParagraphById } from '@/lib/classics';
 import { Msg, KoTermText } from '@/components/I18nText';
+import LocaleMeta from '@/components/LocaleMeta';
 import { CLASSIC_BOOKS_KO, CLASSIC_CHAPTERS_KO, CLASSIC_PARAGRAPHS_KO } from '@/lib/i18n/classics-ko';
 
 export const metadata = {
@@ -20,6 +21,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+      <LocaleMeta ko={{ title: '검색 · 고전 원문 서고' }} />
       <div className="px-6 py-4 flex items-center justify-between"
         style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>
         <Link href="/library" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.3em', textDecoration: 'none' }}>

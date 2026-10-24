@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ALL_BOOKS, getChapter } from '@/lib/classics';
 import { Msg, Bi, KoTermText, OnlyIn } from '@/components/I18nText';
+import LocaleMeta from '@/components/LocaleMeta';
 import { CLASSIC_BOOKS_KO, CLASSIC_CHAPTERS_KO, CLASSIC_PARAGRAPHS_KO } from '@/lib/i18n/classics-ko';
 
 export async function generateStaticParams() {
@@ -38,6 +39,12 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+      {bookKo && chKo(chapterIdx) && (
+        <LocaleMeta ko={{
+          title: `${chKo(chapterIdx).title.ko} · 『${bookKo.title.ko}』 · 자미두수 고전`,
+          description: chKo(chapterIdx).subtitle || `『${bookKo.title.ko}』 ${chKo(chapterIdx).title.ko} 원문과 번역`,
+        }} />
+      )}
       <div className="px-6 py-4 flex items-center justify-between"
         style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>
         <Link href={`/library/${book.slug}`} style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.3em', textDecoration: 'none' }}>

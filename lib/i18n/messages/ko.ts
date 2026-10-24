@@ -176,6 +176,12 @@ export const ko: Messages = {
     basis: '니하이샤 『천기』 체계로 엮음 · 고전 인용 포함',
     fourteen: '14주성',
   },
+  legal: {
+    backHome: '홈으로',
+    brand: '자미 명반',
+    privacy: '개인정보처리방침',
+    terms: '이용약관',
+  },
   heming: {
     back: '뒤로',
     navTitle: '궁합 분석',

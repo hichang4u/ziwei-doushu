@@ -7,6 +7,7 @@
 import Link from 'next/link';
 import { ALL_BOOKS, TOTAL_PARAGRAPHS } from '@/lib/classics';
 import LibrarySearch from './LibrarySearch';
+import LocaleMeta from '@/components/LocaleMeta';
 import { Msg, Bi, KoTermText, OnlyIn } from '@/components/I18nText';
 import { CLASSIC_BOOKS_KO } from '@/lib/i18n/classics-ko';
 
@@ -18,6 +19,7 @@ export const metadata = {
 export default function LibraryHomePage() {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+      <LocaleMeta ko={{ title: '니하이샤 방법론 · 고전 원문 서고 · 자미두수전집 / 전서 / 골수부', description: '자미두수 고전 전문 검색: 『자미두수전집』 『자미두수전서』 『골수부』, 니하이샤 『천기』의 인용 출처' }} />
       {/* 顶栏 */}
       <div className="px-6 py-4 flex items-center justify-between"
         style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>
