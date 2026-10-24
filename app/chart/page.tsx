@@ -90,7 +90,7 @@ export default function ChartPage() {
             palaceName={selectedStar?.palaceName}
             onClose={() => setSelectedStar(null)}
           />
-          <InsightPanel chart={chart} selectedPalace={selectedPalace} />
+          <InsightPanel chart={chart} selectedPalace={selectedPalace} liunianYear={liunianYear} />
         </div>
       </div>
     </main>

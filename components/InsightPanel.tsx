@@ -6,6 +6,7 @@ import type { TimeView } from './TimeNav';
 import { useLocale } from './LocaleProvider';
 import { PROMPTS } from '@/lib/i18n';
 import type { TopicKey } from '@/lib/i18n/prompts/zh';
+import { chartToText, withChartData } from '@/lib/i18n/chart-text';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -23,6 +24,8 @@ interface InsightPanelProps {
   chart: ZiweiChart;
   selectedPalace?: Palace | null;
   selectedSiHua?: SelectedSiHua | null;
+  /** 流年年份：复制给 AI 的命盘文本里附带该年流年 */
+  liunianYear?: number;
 }
 
 const TOPIC_KEYS: TopicKey[] = ['overview', 'love', 'career', 'wealth', 'health', 'personality'];
@@ -67,11 +70,37 @@ function AiContent({ text, streaming }: { text: string; streaming?: boolean }) {
   );
 }
 
-export default function InsightPanel({ chart, selectedPalace, selectedSiHua }: InsightPanelProps) {
+/** navigator.clipboard 只在安全上下文可用（https / localhost）；局域网 http 访问时退回 execCommand */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch { /* fall through */ }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liunianYear }: InsightPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTopic, setActiveTopic] = useState<string>('overview');
+  // 最近一次自动发出的提示词（主题 / 宫位 / 四化），复制给 AI 时作为默认提问
+  const [currentPrompt, setCurrentPrompt] = useState('');
+  const [copyState, setCopyState] = useState<{ kind: 'question' | 'data'; ok: boolean } | null>(null);
   const messagesRef = useRef<Message[]>([]); // always-current copy for closures
   const loadingRef = useRef(false);
   const autoLoaded = useRef(false);
@@ -186,6 +215,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua }: I
     loadingRef.current = true;
     setLoading(true);
 
+    if (hidden) setCurrentPrompt(text);
     const userMsg: Message = { role: 'user', content: text, hidden };
     // Capture current messages synchronously via ref (avoids stale closure)
     const apiMessages = [...messagesRef.current, userMsg].map(m => ({
@@ -206,6 +236,14 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua }: I
 
   const handleSend = () => {
     sendMessage(input);
+  };
+
+  const handleCopy = async (kind: 'question' | 'data') => {
+    const data = chartToText(chart, locale, { liunianYear });
+    const question = input.trim() || currentPrompt || prompts.topics.overview;
+    const ok = await copyText(kind === 'data' ? data : withChartData(question, data));
+    setCopyState({ kind, ok });
+    setTimeout(() => setCopyState(null), 2000);
   };
 
   return (
@@ -233,6 +271,23 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua }: I
             );
           })}
         </div>
+
+        {/* ── 复制给 AI：开源版无 /api/interpret 时的替代路径 ── */}
+        <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+          <span className="text-[10px] font-medium" style={{ color: 'var(--t-gold)' }}>{t.copyTitle}</span>
+          {(['question', 'data'] as const).map(kind => (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => handleCopy(kind)}
+              className="px-2 py-1 text-[10px] rounded-md transition-colors"
+              style={{ border: '1px solid var(--t-border)', color: 'var(--t-text2)' }}
+            >
+              {copyState?.kind === kind ? (copyState.ok ? `✓ ${t.copied}` : t.copyFailed) : (kind === 'question' ? t.copyWithQuestion : t.copyDataOnly)}
+            </button>
+          ))}
+        </div>
+        <p className="mt-1 text-[10px] leading-snug" style={{ color: 'var(--t-faint)' }}>{t.copyHint}</p>
       </div>
 
       {/* ── Messages ── */}
