@@ -38,3 +38,5 @@ npm test             # 排盘回归
 ---
 
 **English.** Issues and PRs are welcome. This repo is an open snapshot of the charting engine behind metisziwei.com; the interpretation database, AI prompts and all `/api/*` backend routes are not included, so AI features return 404 by design. For a chart you believe is wrong, please use the "Chart result question" form with full birth data and a reference result. Before opening a PR, run `npm ci`, `npm run typecheck` and `npm test`; changes to chart results need evidence and a regression test.
+
+**한국어.** [CONTRIBUTING.ko.md](./CONTRIBUTING.ko.md)
