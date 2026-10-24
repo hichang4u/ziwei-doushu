@@ -246,6 +246,8 @@ export const BRIGHTNESS_NUM_TO_CN_BY_SCHOOL: Record<BrightnessSchool, Record<num
 };
 
 /**
+ * 已弃用（2026-06-20 起无调用方，亮度改由 schoolStarBrightness 直接查表）。
+ *
  * 把数字亮度表（按地支 1=寅...12=丑）转成 iztro 兼容的中文亮度数组
  * iztro 亮度数组顺序：[寅,卯,辰,巳,午,未,申,酉,戌,亥,子,丑]
  *

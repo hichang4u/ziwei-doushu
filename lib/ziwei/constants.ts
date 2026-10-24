@@ -102,9 +102,8 @@ export const TIANMA_TABLE: Record<number, number> = {
   7: 5,   // 未年 → 巳
 };
 
-// ★ 所有星曜亮度（主星 + 辅星）已迁移到 algorithm.ts → astro.config({ brightness })
-// 覆写范围：9 颗主星 + 3 颗辅星（文曲/铃星/擎羊），共 24 处差异修正。
-// 其余星曜（武曲/廉贞/贪狼/巨门/破军/文昌/火星/陀罗）iztro 默认值与全书一致，无需覆写。
+// ★ 星曜亮度不在本文件：2026-06-20 起由 school-data.ts schoolStarBrightness 按流派查 SB 表，
+//   在 algorithm.ts generateChart 装配时写入（主星 + 辅星 + 煞星 + 杂耀同一套表）。
 // 旧 STAR_BRIGHTNESS 是死代码（从未被引用），已在 2026-05-08 清理。
 
 // 主星描述（倪师体系）

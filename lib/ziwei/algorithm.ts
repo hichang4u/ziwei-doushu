@@ -27,9 +27,8 @@ import { DEFAULT_LEAP_MONTH } from './school-config';
 // 已通过 config.brightness 全量覆写修正。
 // 数组索引从寅起：0=寅 1=卯 2=辰 3=巳 4=午 5=未 6=申 7=酉 8=戌 9=亥 10=子 11=丑
 // 交叉验证来源：紫微取象派全书解读、令东来庙旺表、iztro 官方文档、金标准盘
-// ★ 抽成具名常量（2026-06-11）：供 setBrightnessSchool('default') 显式还原，根治「切流派后全局亮度泄漏」。
-//   必须完整覆盖全部 14 主星——流派表（schoolBrightnessTableToIztroFormat）覆写 14 主星，
-//   若此处缺某主星键，切流派后该星被污染却无键可盖回（实测：武曲/廉贞/巨门/破军 曾缺失）。
+// ★ 2026-06-20 起命盘显示的亮度全部由 schoolStarBrightness 查 SB 表，不再读 iztro 的亮度，
+//   此表只写进 astro.config、对 generateChart 输出无影响；以下逐星注释为历史校订记录。
 const DEFAULT_BRIGHTNESS: Record<string, string[]> = {
     //            寅     卯     辰     巳     午     未     申     酉     戌     亥     子     丑
     // ── 紫微系六星 ──────────────────────────────────────────
@@ -80,26 +79,24 @@ const DEFAULT_BRIGHTNESS: Record<string, string[]> = {
 
     // ── 武曲 / 廉贞 / 巨门 / 破军 ───────────────────────────────
     // 这 4 颗主星 iztro 原生值与《全书》一致，原先未显式覆写（靠 iztro 内置 fallback）。
-    // ★ 2026-06-11 补入原生值（探针 scripts 实测，寅起）：使 DEFAULT 表完整含 14 主星，
-    //   流派切换后 setBrightnessSchool('default') 才能全量盖回、还原默认。
+    // ★ 2026-06-11 补入原生值（探针 scripts 实测，寅起）：使 DEFAULT 表完整含 14 主星。
     '武曲': ['得','利','庙','平','旺','庙','得','利','庙','平','旺','庙'],
     '廉贞': ['庙','平','利','陷','平','利','庙','平','利','陷','平','利'],
     '巨门': ['庙','庙','陷','旺','旺','不','庙','庙','陷','旺','旺','不'],
     '破军': ['得','陷','旺','平','庙','旺','得','陷','旺','平','庙','旺'],
 };
 
-// 模块加载即写入默认亮度表 + 农历正月初一换年规则（astro.config 为全局副作用）
+// 模块加载即写入农历正月初一换年规则（astro.config 为全局副作用，只此一处调用）；
+// brightness 一并写入，但装配层不读 iztro 亮度，见上方 DEFAULT_BRIGHTNESS 注释
 astro.config({
   yearDivide: 'normal',
   brightness: DEFAULT_BRIGHTNESS,
 });
 
 // ─── 亮度流派切换（2026-05-12，金标准盘核对后引入）─────────────────────────
-// 默认 = 我们当前的自定义表（基于全书 + 金标准盘交叉验证）
-// 切换 = 调 setBrightnessSchool('qs' | 'xd1' | 'zz' | 'xd2') 覆写为通行四派任一套
-//
-// 注意：astro.config 是全局副作用，每次调用影响所有后续 generateChart
-//       服务端多用户场景下要小心 race condition（chart 生成是同步的，影响小）
+// 默认 = 《斗数全书》QS；可选 'QS' | 'XD1' | 'ZZ' | 'XD2'（'default' 等同 QS）
+// 按次指定：generateChart(info, { brightnessSchool })
+// 改模块默认值：setBrightnessSchool(school)，影响此后所有未传 opts 的 generateChart
 
 export type SchoolBrightnessKind = 'default' | BrightnessSchool;
 
