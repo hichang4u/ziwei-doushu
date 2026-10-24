@@ -8,11 +8,13 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale } from '@/components/LocaleProvider';
 
 export default function LibrarySearch() {
   const [q, setQ] = useState('');
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { m } = useLocale();
 
   const submit = () => {
     const query = q.trim();
@@ -36,7 +38,7 @@ export default function LibrarySearch() {
         value={q}
         onChange={e => setQ(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && submit()}
-        placeholder="搜索古籍原文，如：七杀朝斗 / 双禄朝垣 / 化忌"
+        placeholder={m.library.searchPlaceholder}
         style={{
           flex: 1,
           padding: '10px 14px',
@@ -63,7 +65,7 @@ export default function LibrarySearch() {
           opacity: q.trim() ? 1 : 0.5,
         }}
       >
-        {isPending ? '…' : '搜索'}
+        {isPending ? '…' : m.library.searchButton}
       </button>
     </div>
   );

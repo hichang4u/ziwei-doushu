@@ -5,6 +5,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ALL_BOOKS, getBookBySlug } from '@/lib/classics';
+import { Msg, Bi, KoTermText } from '@/components/I18nText';
+import { CLASSIC_BOOKS_KO, CLASSIC_CHAPTERS_KO } from '@/lib/i18n/classics-ko';
 
 export async function generateStaticParams() {
   return ALL_BOOKS.map(b => ({ book: b.slug }));
@@ -30,13 +32,13 @@ export default async function BookPage({ params }: { params: Promise<{ book: str
       <div className="px-6 py-4 flex items-center justify-between"
         style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>
         <Link href="/library" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.3em', textDecoration: 'none' }}>
-          ← 古籍库
+          <Msg k="library.backLibrary" />
         </Link>
         <div style={{ fontSize: '12px', color: 'var(--tx-3)', letterSpacing: '0.2em' }}>
-          《{book.title}》
+          <Msg k="library.bookOpen" /><KoTermText zh={book.title} term={CLASSIC_BOOKS_KO[book.slug]?.title} /><Msg k="library.bookClose" />
         </div>
         <Link href="/" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.2em', textDecoration: 'none' }}>
-          首页 →
+          <Msg k="library.home" />
         </Link>
       </div>
 
@@ -44,20 +46,20 @@ export default async function BookPage({ params }: { params: Promise<{ book: str
         {/* 书名信息 */}
         <div className="text-center mb-12">
           <div style={{ fontSize: '11px', color: 'var(--tx-3)', letterSpacing: '0.3em', marginBottom: '8px' }}>
-            {book.dynasty} · {book.author}
+            <Bi zh={book.dynasty} ko={CLASSIC_BOOKS_KO[book.slug]?.dynasty} /> · <Bi zh={book.author} ko={CLASSIC_BOOKS_KO[book.slug]?.author} />
           </div>
           <h1 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 700, color: 'var(--tx-0)', letterSpacing: '0.15em', marginBottom: '14px' }}>
-            《{book.title}》
+            <Msg k="library.bookOpen" /><KoTermText zh={book.title} term={CLASSIC_BOOKS_KO[book.slug]?.title} /><Msg k="library.bookClose" />
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--tx-2)', lineHeight: 1.8, maxWidth: '500px', margin: '0 auto' }}>
-            {book.intro}
+            <Bi zh={book.intro} ko={CLASSIC_BOOKS_KO[book.slug]?.intro} />
           </p>
         </div>
 
         {/* 章节目录 */}
         <div style={{ background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid rgba(184,146,42,0.2)', overflow: 'hidden' }}>
           <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(184,146,42,0.15)', fontSize: '11px', color: 'var(--tx-3)', letterSpacing: '0.3em' }}>
-            CHAPTERS · 章节目录
+            <Msg k="library.chaptersHeader" />
           </div>
           {book.chapters.map((chapter, i) => (
             <Link
@@ -80,16 +82,16 @@ export default async function BookPage({ params }: { params: Promise<{ book: str
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '15px', color: 'var(--tx-0)', fontWeight: 500, letterSpacing: '0.08em', marginBottom: '2px' }}>
-                  {chapter.title}
+                  <KoTermText zh={chapter.title} term={CLASSIC_CHAPTERS_KO[`${book.slug}/${i}`]?.title} />
                 </div>
                 {chapter.subtitle && (
                   <div style={{ fontSize: '11px', color: 'var(--tx-3)' }}>
-                    {chapter.subtitle}
+                    <Bi zh={chapter.subtitle} ko={CLASSIC_CHAPTERS_KO[`${book.slug}/${i}`]?.subtitle} />
                   </div>
                 )}
               </div>
               <div style={{ fontSize: '10px', color: 'var(--tx-3)', letterSpacing: '0.1em' }}>
-                {chapter.paragraphs.length} 段
+                <Msg k="library.paraUnit" args={[chapter.paragraphs.length]} />
               </div>
               <div style={{ fontSize: '12px', color: 'var(--ac)' }}>→</div>
             </Link>

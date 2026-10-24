@@ -4,6 +4,8 @@
 
 import Link from 'next/link';
 import { searchClassics, getParagraphById } from '@/lib/classics';
+import { Msg, KoTermText } from '@/components/I18nText';
+import { CLASSIC_BOOKS_KO, CLASSIC_CHAPTERS_KO, CLASSIC_PARAGRAPHS_KO } from '@/lib/i18n/classics-ko';
 
 export const metadata = {
   title: '搜索 · 古籍原典库',
@@ -12,33 +14,35 @@ export const metadata = {
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const sp = await searchParams;
   const q = sp.q?.trim() || '';
-  const hits = q ? searchClassics(q, 50) : [];
+  // 含韩文的检索词搜韩文译文（原文是简体古文，韩文 / 正体字搜不到），其余搜原文
+  const searchKo = /[가-힣]/.test(q);
+  const hits = q ? searchClassics(q, 50, searchKo ? p => CLASSIC_PARAGRAPHS_KO[p.id] : undefined) : [];
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       <div className="px-6 py-4 flex items-center justify-between"
         style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>
         <Link href="/library" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.3em', textDecoration: 'none' }}>
-          ← 古籍库
+          <Msg k="library.backLibrary" />
         </Link>
         <div style={{ fontSize: '12px', color: 'var(--tx-3)', letterSpacing: '0.2em' }}>
-          搜索结果
+          <Msg k="library.searchTitle" />
         </div>
         <Link href="/" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.2em', textDecoration: 'none' }}>
-          首页 →
+          <Msg k="library.home" />
         </Link>
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <div className="text-center mb-10">
           <div style={{ fontSize: '13px', color: 'var(--tx-3)', letterSpacing: '0.15em', marginBottom: '4px' }}>
-            搜索关键词
+            <Msg k="library.searchKeyword" />
           </div>
           <h1 style={{ fontSize: 'clamp(22px, 3.5vw, 32px)', fontWeight: 700, color: 'var(--tx-0)', letterSpacing: '0.1em' }}>
-            「{q || '（空）'}」
+            「{q || <Msg k="library.searchEmpty" />}」
           </h1>
           <div style={{ fontSize: '12px', color: 'var(--tx-3)', marginTop: '8px' }}>
-            共找到 <strong style={{ color: 'var(--ac)' }}>{hits.length}</strong> 条古籍原文匹配
+            <Msg k="library.foundPre" /><strong style={{ color: 'var(--ac)' }}>{hits.length}</strong><Msg k="library.foundPost" />
           </div>
         </div>
 
@@ -54,14 +58,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             <div style={{ fontSize: '40px', marginBottom: '12px', opacity: 0.4 }}>📜</div>
             {q ? (
               <>
-                <div style={{ fontSize: '14px', marginBottom: '6px' }}>暂未在已收录古籍中找到这个关键词</div>
+                <div style={{ fontSize: '14px', marginBottom: '6px' }}><Msg k="library.notFound" /></div>
                 <div style={{ fontSize: '11px', color: 'var(--tx-3)', lineHeight: 1.7 }}>
-                  我们持续补充内容中。可尝试搜索：<br />
-                  <span style={{ color: 'var(--ac)' }}>七杀朝斗 / 双禄朝垣 / 化忌 / 紫微 / 命宫 / 机月同梁</span>
+                  <Msg k="library.tryHint" /><br />
+                  <span style={{ color: 'var(--ac)' }}><Msg k="library.trySamples" /></span>
                 </div>
               </>
             ) : (
-              <div style={{ fontSize: '13px' }}>请输入要搜索的关键词</div>
+              <div style={{ fontSize: '13px' }}><Msg k="library.enterKeyword" /></div>
             )}
           </div>
         ) : (
@@ -93,9 +97,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                     marginBottom: '8px',
                     letterSpacing: '0.1em',
                   }}>
-                    <span style={{ color: 'var(--ac)', fontWeight: 600 }}>《{hit.bookTitle}》</span>
+                    <span style={{ color: 'var(--ac)', fontWeight: 600 }}>
+                      <Msg k="library.bookOpen" /><KoTermText zh={hit.bookTitle} term={CLASSIC_BOOKS_KO[hit.bookSlug]?.title} /><Msg k="library.bookClose" />
+                    </span>
                     <span style={{ opacity: 0.5 }}>·</span>
-                    <span>{hit.chapterTitle}</span>
+                    <span><KoTermText zh={hit.chapterTitle} term={CLASSIC_CHAPTERS_KO[`${hit.bookSlug}/${chapterIdx}`]?.title} /></span>
+                    {searchKo && <span style={{ marginLeft: 'auto', color: 'var(--ac)' }}><Msg k="library.koHit" /></span>}
                   </div>
                   <div
                     style={{

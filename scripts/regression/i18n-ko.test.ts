@@ -9,6 +9,7 @@
  * ⑤ 文案：ko.ts 与 zh.ts 键结构、函数参数个数逐一对应。
  * ⑥ AI 提示词：ko 与 zh 段落结构一致、ko 要求韩文作答、宫位主管表以引擎宫名为键。
  * ⑦ 格局译层：patterns.ts 固定字面量全有译文、实际排盘产出整条译完且动态规则全命中；星曜详解键齐全。
+ * ⑧ 古籍库 / 知识库：书目·章节·段落译文与古籍数据逐键对应，韩文检索走译文且原文检索默认行为不变。
  */
 import { generateChart } from '../../lib/ziwei/algorithm';
 import { STEMS, BRANCHES, SI_HUA_TABLE } from '../../lib/ziwei/constants';
@@ -26,6 +27,10 @@ import {
   translatePatternText, translateSource, patternNameKo, PATTERN_NAMES_KO, TEXT_KO, DYNAMIC_RULES,
 } from '../../lib/i18n/patterns-ko';
 import { STAR_DETAIL_KO, STAR_DESCRIPTIONS_KO, AUX_STAR_NOTES_KO } from '../../lib/i18n/star-detail-ko';
+import { ALL_BOOKS, searchClassics } from '../../lib/classics';
+import { CLASSIC_BOOKS_KO, CLASSIC_CHAPTERS_KO, CLASSIC_PARAGRAPHS_KO } from '../../lib/i18n/classics-ko';
+import { ALL_STARS } from '../../lib/seo/knowledge';
+import { STAR_BRIEF_SEO_KO } from '../../lib/i18n/knowledge-ko';
 
 let bad = 0;
 const fail = (m: string) => { bad++; console.log(`  ❌ ${m}`); };
@@ -115,7 +120,9 @@ const ok = (m: string) => console.log(`  ✅ ${m}`);
       for (const k of ka) walk((a as Record<string, unknown>)[k], (b as Record<string, unknown>)?.[k], `${path}.${k}`);
       return;
     }
-    if (typeof b !== 'string' || b === '') diffs.push(`${path} 应为非空字符串`);
+    // 数字前后的句子碎片（…Pre / …Mid / …Post）因语序不同允许为空，如韩文「12건이 일치합니다」无前缀
+    const fragment = /(Pre|Mid|Post)$/.test(path);
+    if (typeof b !== 'string' || (b === '' && !fragment)) diffs.push(`${path} 应为非空字符串`);
   };
   walk(zh, ko, 'ko');
   if (diffs.length) fail(`文案：${diffs.join('; ')}`);
@@ -195,6 +202,30 @@ const ok = (m: string) => console.log(`  ✅ ${m}`);
 
   if (issues.length) fail(`格局 / 星曜：${[...new Set(issues)].slice(0, 8).join('; ')}`);
   else ok(`格局：源码固定文本 ${new Set(literals).size} 条全有译文；${N} 张盘 ${total} 条格局（${seenNames.size} 种）整条译完，动态规则 ${DYNAMIC_RULES.length} 条全命中；星曜详解键齐全`);
+}
+
+/* ── ⑧ 古籍库 / 知识库 ──────────────────────────────────────── */
+{
+  const issues: string[] = [];
+  const same = (label: string, got: string[], want: string[]) => {
+    const g = new Set(got), w = new Set(want);
+    const missing = want.filter((k) => !g.has(k)), extra = got.filter((k) => !w.has(k));
+    if (missing.length || extra.length) issues.push(`${label} 缺 ${missing.slice(0, 3).join(' ')} 多 ${extra.slice(0, 3).join(' ')}`);
+  };
+  same('古籍书目', Object.keys(CLASSIC_BOOKS_KO), ALL_BOOKS.map((b) => b.slug));
+  same('古籍章节', Object.keys(CLASSIC_CHAPTERS_KO), ALL_BOOKS.flatMap((b) => b.chapters.map((_, i) => `${b.slug}/${i}`)));
+  same('古籍段落', Object.keys(CLASSIC_PARAGRAPHS_KO), ALL_BOOKS.flatMap((b) => b.chapters.flatMap((c) => c.paragraphs.map((p) => p.id))));
+  same('知识库主星简介', Object.keys(STAR_BRIEF_SEO_KO), ALL_STARS);
+
+  // 韩文检索走译文：「화기」应命中，且命中段落的译文里确有该词
+  const koHits = searchClassics('화기', 50, (p) => CLASSIC_PARAGRAPHS_KO[p.id]);
+  if (koHits.length === 0) issues.push('韩文检索「화기」无命中');
+  if (koHits.some((h) => !CLASSIC_PARAGRAPHS_KO[h.paragraphId]?.includes('화기'))) issues.push('韩文检索命中段落的译文不含检索词');
+  // 不传 textOf 时仍按原文检索（默认行为不变）
+  if (searchClassics('化忌', 50).some((h) => !h.text.includes('化忌'))) issues.push('原文检索默认行为被改变');
+
+  if (issues.length) fail(`古籍 / 知识库：${issues.join('; ')}`);
+  else ok(`古籍：${ALL_BOOKS.length} 部书 / ${Object.keys(CLASSIC_CHAPTERS_KO).length} 章 / ${Object.keys(CLASSIC_PARAGRAPHS_KO).length} 段译文与数据逐键对应，韩文检索「화기」命中 ${koHits.length} 段；知识库 14 主星简介齐全`);
 }
 
 if (bad) { console.log(`\n❌ i18n-ko 回归失败 ${bad} 项`); process.exit(1); }

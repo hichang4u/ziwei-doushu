@@ -5,6 +5,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ALL_BOOKS, getChapter } from '@/lib/classics';
+import { Msg, Bi, KoTermText, OnlyIn } from '@/components/I18nText';
+import { CLASSIC_BOOKS_KO, CLASSIC_CHAPTERS_KO, CLASSIC_PARAGRAPHS_KO } from '@/lib/i18n/classics-ko';
 
 export async function generateStaticParams() {
   return ALL_BOOKS.flatMap(b =>
@@ -28,6 +30,9 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
   if (!result) notFound();
 
   const { book, chapter, chapterIdx } = result;
+  const bookKo = CLASSIC_BOOKS_KO[book.slug];
+  const chKo = (i: number) => CLASSIC_CHAPTERS_KO[`${book.slug}/${i}`];
+  const bookTitle = <><Msg k="library.bookOpen" /><KoTermText zh={book.title} term={bookKo?.title} /><Msg k="library.bookClose" /></>;
   const prevIdx = chapterIdx - 1;
   const nextIdx = chapterIdx + 1;
 
@@ -36,13 +41,13 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
       <div className="px-6 py-4 flex items-center justify-between"
         style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>
         <Link href={`/library/${book.slug}`} style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.3em', textDecoration: 'none' }}>
-          ← 《{book.title}》目录
+          ← {bookTitle}<Msg k="library.tocSuffix" />
         </Link>
         <div style={{ fontSize: '12px', color: 'var(--tx-3)', letterSpacing: '0.15em' }}>
-          {chapter.title}
+          <KoTermText zh={chapter.title} term={chKo(chapterIdx)?.title} />
         </div>
         <Link href="/library" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.2em', textDecoration: 'none' }}>
-          古籍库 →
+          <Msg k="library.toLibrary" />
         </Link>
       </div>
 
@@ -50,14 +55,14 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
         {/* 标题 */}
         <div className="text-center mb-10">
           <div style={{ fontSize: '11px', color: 'var(--tx-3)', letterSpacing: '0.25em', marginBottom: '8px' }}>
-            《{book.title}》· {book.dynasty}
+            {bookTitle}· <Bi zh={book.dynasty} ko={bookKo?.dynasty} />
           </div>
           <h1 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 700, color: 'var(--tx-0)', letterSpacing: '0.15em', marginBottom: '8px' }}>
-            {chapter.title}
+            <KoTermText zh={chapter.title} term={chKo(chapterIdx)?.title} />
           </h1>
           {chapter.subtitle && (
             <div style={{ fontSize: '13px', color: 'var(--tx-2)', letterSpacing: '0.1em' }}>
-              {chapter.subtitle}
+              <Bi zh={chapter.subtitle} ko={chKo(chapterIdx)?.subtitle} />
             </div>
           )}
         </div>
@@ -100,6 +105,24 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
                   {p.text}
                 </p>
               </div>
+              {/* 韩文界面：原文下附韩文译文（原文始终保留） */}
+              {CLASSIC_PARAGRAPHS_KO[p.id] && (
+                <OnlyIn locale="ko">
+                  <div style={{
+                    marginTop: '8px',
+                    marginLeft: '36px',
+                    padding: '8px 12px',
+                    background: 'rgba(184,146,42,0.05)',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    color: 'var(--tx-2)',
+                    lineHeight: 1.8,
+                  }}>
+                    <span style={{ fontSize: '10px', color: 'var(--ac)', marginRight: '6px' }}><Msg k="library.translationLabel" /></span>
+                    {CLASSIC_PARAGRAPHS_KO[p.id]}
+                  </div>
+                </OnlyIn>
+              )}
               {p.translation && (
                 <div style={{
                   marginTop: '8px',
@@ -149,8 +172,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
                 color: 'var(--tx-0)',
               }}
             >
-              <div style={{ fontSize: '10px', color: 'var(--tx-3)', letterSpacing: '0.2em', marginBottom: '2px' }}>← 上一章</div>
-              <div style={{ fontSize: '13px', fontWeight: 500 }}>{book.chapters[prevIdx].title}</div>
+              <div style={{ fontSize: '10px', color: 'var(--tx-3)', letterSpacing: '0.2em', marginBottom: '2px' }}><Msg k="library.prevChapter" /></div>
+              <div style={{ fontSize: '13px', fontWeight: 500 }}><KoTermText zh={book.chapters[prevIdx].title} term={chKo(prevIdx)?.title} /></div>
             </Link>
           ) : <div style={{ flex: 1 }} />}
           {nextIdx < book.chapters.length ? (
@@ -167,8 +190,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
                 textAlign: 'right',
               }}
             >
-              <div style={{ fontSize: '10px', color: 'var(--tx-3)', letterSpacing: '0.2em', marginBottom: '2px' }}>下一章 →</div>
-              <div style={{ fontSize: '13px', fontWeight: 500 }}>{book.chapters[nextIdx].title}</div>
+              <div style={{ fontSize: '10px', color: 'var(--tx-3)', letterSpacing: '0.2em', marginBottom: '2px' }}><Msg k="library.nextChapter" /></div>
+              <div style={{ fontSize: '13px', fontWeight: 500 }}><KoTermText zh={book.chapters[nextIdx].title} term={chKo(nextIdx)?.title} /></div>
             </Link>
           ) : <div style={{ flex: 1 }} />}
         </div>
