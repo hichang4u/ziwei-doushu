@@ -99,7 +99,7 @@ export function Term({ name, kind = 'term', subClassName }: {
   );
 }
 
-/** 右下角浮动的语言 / 术语显示切换 */
+/** 左下方浮动的语言 / 术语显示切换（右下角会盖住解读面板的发送按钮） */
 export function LocaleSwitcher() {
   const { locale, setLocale, termStyle, setTermStyle, m } = useLocale();
   const pill = (active: boolean): React.CSSProperties => ({
@@ -116,7 +116,8 @@ export function LocaleSwitcher() {
       role="group"
       aria-label={m.locale.switchLabel}
       style={{
-        position: 'fixed', right: 16, bottom: 16, zIndex: 60,
+        // bottom 64：让开 next dev 左下角的开发指示徽标（仅开发模式），首页 / 合盘页顶部有固定导航
+        position: 'fixed', left: 16, bottom: 64, zIndex: 60,
         display: 'flex', alignItems: 'center', gap: 4, padding: 4,
         borderRadius: 999, border: '1px solid var(--t-border, rgba(128,128,128,0.3))',
         background: 'var(--t-surface, rgba(20,20,30,0.85))', backdropFilter: 'blur(12px)',
