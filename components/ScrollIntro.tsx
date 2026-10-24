@@ -1,16 +1,20 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocale } from './LocaleProvider';
 
 interface ScrollIntroProps {
   onComplete: () => void;
-  /** 跳过按钮文案 */
+  /** 跳过按钮文案（不传则按界面语言） */
   skipLabel?: string;
 }
 
 const BEIDOU = ['天枢', '天璇', '天玑', '天权', '玉衡', '开阳', '摇光'];
 
-export default function ScrollIntro({ onComplete, skipLabel = '跳 过' }: ScrollIntroProps) {
+// 北斗七星名与朱砂印「王多鱼印」是书法装饰，两种语言都保留原字
+export default function ScrollIntro({ onComplete, skipLabel }: ScrollIntroProps) {
+  const { m } = useLocale();
+  const t = m.scrollIntro;
   // visible：整个 intro 是否在显示
   // unrolled：卷轴是否已展开（控制内容浮现）
   const [visible, setVisible] = useState(true);
@@ -159,7 +163,7 @@ export default function ScrollIntro({ onComplete, skipLabel = '跳 过' }: Scrol
                   textShadow: '0 1px 0 rgba(255,250,235,0.3)',
                   whiteSpace: 'nowrap',
                 }}>
-                  紫微命盘
+                  {t.title}
                 </h1>
 
                 {/* 副标 楷体 */}
@@ -172,7 +176,7 @@ export default function ScrollIntro({ onComplete, skipLabel = '跳 过' }: Scrol
                   marginBottom: '6px',
                   whiteSpace: 'nowrap',
                 }}>
-                  观 天 之 象 · 察 人 之 命
+                  {t.motto}
                 </div>
                 <div style={{
                   fontSize: 'clamp(11px, 1.2vw, 14px)',
@@ -182,7 +186,7 @@ export default function ScrollIntro({ onComplete, skipLabel = '跳 过' }: Scrol
                   whiteSpace: 'nowrap',
                   opacity: 0.85,
                 }}>
-                  倪海厦《天纪》正宗体系
+                  {t.lineage}
                 </div>
 
                 {/* 朱砂方印 */}
@@ -310,7 +314,7 @@ export default function ScrollIntro({ onComplete, skipLabel = '跳 过' }: Scrol
               e.currentTarget.style.color = 'rgba(232,220,196,0.55)';
             }}
           >
-            {skipLabel} →
+            {skipLabel ?? t.skip} →
           </button>
         </motion.div>
       )}

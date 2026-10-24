@@ -3,12 +3,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ScrollIntro from '@/components/ScrollIntro';
+import { useLocale } from '@/components/LocaleProvider';
 
 export default function PreviewPage() {
   const router = useRouter();
   // replayKey 用于强制重置 ScrollIntro（用户点"再播放一次"时）
   const [replayKey, setReplayKey] = useState(0);
   const [done, setDone] = useState(false);
+  const { m } = useLocale();
+  const t = m.preview;
 
   return (
     <>
@@ -37,7 +40,7 @@ export default function PreviewPage() {
             marginBottom: '16px',
             fontWeight: 600,
           }}>
-            紫微卷轴 · 开场预览
+            {t.title}
           </h1>
           <p style={{
             fontSize: '14px', color: '#a89878',
@@ -46,8 +49,8 @@ export default function PreviewPage() {
             marginBottom: '40px',
             fontFamily: '"STKaiti", "Kaiti SC", serif',
           }}>
-            刚才看到的卷轴效果会在每次进入主页时缓缓铺开。<br />
-            如果满意，告诉我，我把它接到主页 / 上线。
+            {t.desc1}<br />
+            {t.desc2}
           </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '24px' }}>
@@ -65,7 +68,7 @@ export default function PreviewPage() {
                 fontWeight: 600,
               }}
             >
-              再 播 放 一 次
+              {t.replay}
             </button>
             <button
               onClick={() => router.push('/')}
@@ -80,7 +83,7 @@ export default function PreviewPage() {
                 cursor: 'pointer',
               }}
             >
-              进 入 原 版 首 页
+              {t.toHome}
             </button>
           </div>
 
@@ -89,11 +92,11 @@ export default function PreviewPage() {
             letterSpacing: '0.15em',
             display: 'flex', gap: '20px',
           }}>
-            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>原版 ↗</Link>
+            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>{t.linkHome}</Link>
             <span>·</span>
-            <Link href="/chart" style={{ color: 'inherit', textDecoration: 'none' }}>命盘</Link>
+            <Link href="/chart" style={{ color: 'inherit', textDecoration: 'none' }}>{t.linkChart}</Link>
             <span>·</span>
-            <Link href="/heming" style={{ color: 'inherit', textDecoration: 'none' }}>合盘</Link>
+            <Link href="/heming" style={{ color: 'inherit', textDecoration: 'none' }}>{t.linkHeming}</Link>
           </div>
 
           {/* 时间轴说明 */}
@@ -109,13 +112,13 @@ export default function PreviewPage() {
             fontFamily: '"STKaiti", serif',
             textAlign: 'left',
           }}>
-            <div style={{ color: '#c89647', marginBottom: '12px', letterSpacing: '0.2em', fontSize: '11px' }}>动画时间轴</div>
-            <div>· 0.0 ~ 1.7 s &nbsp;&nbsp;卷轴从中央向两侧展开</div>
-            <div>· 1.9 ~ 2.7 s &nbsp;&nbsp;宣纸内容浮现（标题 + 副标 + 朱砂印）</div>
-            <div>· 2.7 ~ 3.5 s &nbsp;&nbsp;停留欣赏</div>
-            <div>· 3.5 ~ 4.2 s &nbsp;&nbsp;整体淡出，进入主页</div>
+            <div style={{ color: '#c89647', marginBottom: '12px', letterSpacing: '0.2em', fontSize: '11px' }}>{t.timelineTitle}</div>
+            <div>· 0.0 ~ 1.7 s &nbsp;&nbsp;{t.t1}</div>
+            <div>· 1.9 ~ 2.7 s &nbsp;&nbsp;{t.t2}</div>
+            <div>· 2.7 ~ 3.5 s &nbsp;&nbsp;{t.t3}</div>
+            <div>· 3.5 ~ 4.2 s &nbsp;&nbsp;{t.t4}</div>
             <div style={{ marginTop: '12px', color: '#6e6048', fontSize: '11px' }}>
-              用户随时可点右下「跳过」直接进入主页。
+              {t.skipNote}
             </div>
           </div>
         </main>
