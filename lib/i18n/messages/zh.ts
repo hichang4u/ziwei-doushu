@@ -80,7 +80,8 @@ export const zh = {
     daXian: '大限',
     daXianRange: (a: number, b: number) => `大限 ${a}–${b}`,
     liuNian: '流年',
-    overlayHead: (label: string, stem: string) => `${label}·${stem}年四化：`,
+    overlayHead: (label: string, stem: string) => `${label}四化（${stem}干）：`,
+    yearLabel: (y: number) => `${y}年`,
     starSihua: (star: string, sihua: string) => `${star}${sihua}`,
   },
   chartPage: {
@@ -128,6 +129,7 @@ export const zh = {
     copyTitle: '复制给 AI 解读',
     copyWithQuestion: '提问 + 命盘',
     copyDataOnly: '仅命盘',
+    sendCopy: '复制',
     copied: '已复制',
     copyFailed: '复制失败',
     copyHint: '粘贴到 DeepSeek、豆包、ChatGPT 等 AI 对话即可。输入框里有问题就复制该问题，否则复制当前选中的主题。',

@@ -5,7 +5,7 @@ import ChartBoard from '@/components/ChartBoard';
 import InsightPanel from '@/components/InsightPanel';
 import PatternsCard from '@/components/PatternsCard';
 import StarDetailPanel from '@/components/StarDetailPanel';
-import TimeNav, { type TimeView } from '@/components/TimeNav';
+import type { TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
 import { useLocale } from '@/components/LocaleProvider';
 import LocaleMeta from '@/components/LocaleMeta';
@@ -52,35 +52,31 @@ export default function ChartPage() {
       <button
         type="button"
         onClick={() => { setChart(null); setSelectedPalace(null); setSelectedStar(null); }}
-        style={{
-          marginBottom: 16, padding: '6px 14px', cursor: 'pointer',
-          border: '1px solid #ccc', borderRadius: 8, background: 'transparent',
-        }}
+        className="mb-4 px-3 py-1.5 rounded-lg text-[13px] transition-colors"
+        style={{ border: '1px solid var(--t-border)', color: 'var(--t-text2)', background: 'transparent' }}
       >
         {m.chartPage.back}
       </button>
-
-      <TimeNav
-        chart={chart}
-        view={view}
-        liunianYear={liunianYear}
-        onViewChange={setView}
-        onYearChange={setLiunianYear}
-      />
 
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 380px)',
-          gap: 20, marginTop: 16, alignItems: 'start',
+          gap: 20, alignItems: 'start',
         }}
       >
         <div>
-          <ChartBoard
-            chart={chart}
-            onPalaceSelect={setSelectedPalace}
-            onStarSelect={(star, palace) => setSelectedStar({ star, palaceName: palace.name })}
-          />
+          <div className="card-glass rounded-xl p-3 sm:p-4">
+            <ChartBoard
+              chart={chart}
+              timeView={view}
+              liunianYear={liunianYear}
+              onTimeViewChange={setView}
+              onLiunianYearChange={setLiunianYear}
+              onPalaceSelect={setSelectedPalace}
+              onStarSelect={(star, palace) => setSelectedStar({ star, palaceName: palace.name })}
+            />
+          </div>
           {/* 规则格局识别：不依赖 AI 接口，开源版也能看到 */}
           <div style={{ marginTop: 16 }}><PatternsCard chart={chart} /></div>
         </div>

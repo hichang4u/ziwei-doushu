@@ -103,6 +103,9 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
   const [copyState, setCopyState] = useState<{ kind: 'question' | 'data'; ok: boolean } | null>(null);
   const messagesRef = useRef<Message[]>([]); // always-current copy for closures
   const loadingRef = useRef(false);
+  // /api/interpret 不存在（开源版）：提示只显示一次，之后的提问改走「复制给 AI」
+  const apiMissingRef = useRef(false);
+  const [apiMissing, setApiMissing] = useState(false);
   const autoLoaded = useRef(false);
   const lastPalaceBranch = useRef<number | undefined>(undefined);
   const lastSiHuaKey = useRef<string | undefined>(undefined);
@@ -203,6 +206,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
       }
     } catch (e) {
       const missing = e instanceof Error && e.message === 'api-missing';
+      if (missing) { apiMissingRef.current = true; setApiMissing(true); }
       setMessages(prev => [...prev, { role: 'assistant', content: missing ? t.apiMissing : t.apiError }]);
     } finally {
       setLoading(false);
@@ -212,6 +216,10 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
 
   const sendMessage = (text: string, hidden = false) => {
     if (!text.trim() || loadingRef.current) return;
+    if (apiMissingRef.current) {
+      if (hidden) setCurrentPrompt(text);
+      return;
+    }
     loadingRef.current = true;
     setLoading(true);
 
@@ -235,6 +243,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
   };
 
   const handleSend = () => {
+    if (apiMissingRef.current) { if (input.trim()) handleCopy('question'); return; }
     sendMessage(input);
   };
 
@@ -376,7 +385,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
               color: 'var(--t-gold)',
             }}
           >
-            {loading ? '…' : t.send}
+            {loading ? '…' : apiMissing ? t.sendCopy : t.send}
           </button>
         </div>
       </div>

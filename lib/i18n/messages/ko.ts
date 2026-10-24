@@ -79,7 +79,8 @@ export const ko: Messages = {
     daXian: '대한',
     daXianRange: (a, b) => `대한 ${a}–${b}`,
     liuNian: '유년',
-    overlayHead: (label, stem) => `${label}·${stem}년 사화:`,
+    overlayHead: (label, stem) => `${label} 사화(천간 ${stem}):`,
+    yearLabel: (y) => `${y}년`,
     starSihua: (star, sihua) => `${star} ${sihua}`,
   },
   chartPage: {
@@ -127,6 +128,7 @@ export const ko: Messages = {
     copyTitle: 'AI 해석용 복사',
     copyWithQuestion: '질문 + 명반',
     copyDataOnly: '명반만',
+    sendCopy: '복사',
     copied: '복사했습니다',
     copyFailed: '복사 실패',
     copyHint: 'ChatGPT·Claude·Gemini 같은 AI 대화창에 붙여 넣으세요. 입력창에 쓴 질문이 있으면 그 질문을, 없으면 지금 고른 주제를 함께 복사합니다.',

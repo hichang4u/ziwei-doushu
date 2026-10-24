@@ -90,6 +90,30 @@
   --bg-page: #020810;
 }
 
+/* ─── 命盘组件 Token（--t-*）──────────────────────────────
+ * ChartBoard / PalaceCell / TimeNav / InsightPanel 等组件用的是旧命名 --t-*，
+ * 开源快照里从未定义，边框、底色、文字色全部失效。这里映射到上面的 2.0 Token，
+ * 随 data-theme 自动切换明暗。 */
+:root {
+  --t-bg:         var(--bg-0);
+  --t-surface:    var(--bg-1);
+  --t-card:       var(--bg-card);
+  --t-text:       var(--tx-0);
+  --t-text1:      var(--tx-1);
+  --t-text2:      var(--tx-2);
+  --t-faint:      var(--tx-3);
+  --t-gold:       var(--ac);
+  --t-border:     var(--bdr-med);
+  --t-border-acc: var(--ac-bdr);
+}
+
+/* 同上：组件引用但从未定义的卡片类 */
+.card-glass {
+  background: var(--bg-card);
+  border: 1px solid var(--bdr-med);
+  box-shadow: var(--sh-sm);
+}
+
 /* ─── 全局基础 ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 

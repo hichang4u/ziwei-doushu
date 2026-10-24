@@ -5,10 +5,16 @@ import type { ZiweiChart, Palace, Star } from '@/lib/ziwei/types';
 import { BRANCHES, STEMS } from '@/lib/ziwei/constants';
 import PalaceCell from './PalaceCell';
 import { Term, useLocale } from './LocaleProvider';
+import { termText } from '@/lib/i18n';
 import TimeNav, { type TimeView, getYearStemIndex, buildSiHuaOverlay } from './TimeNav';
 
 interface ChartBoardProps {
   chart: ZiweiChart;
+  /** 本命 / 大限 / 流年 与流年年份由页面持有（「复制给 AI」也用同一份） */
+  timeView: TimeView;
+  liunianYear: number;
+  onTimeViewChange: (view: TimeView) => void;
+  onLiunianYearChange: (year: number) => void;
   onStarSelect?: (star: Star, palace: Palace) => void;
   onPalaceSelect?: (palace: Palace) => void;
   onSiHuaClick?: (starName: string, siHua: string, view: TimeView) => void;
@@ -53,27 +59,37 @@ function getSanFangSiZheng(branch: number): [number, number, number, number] {
 
 const ANIMATION_ORDER = [5, 6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4];
 
-export default function ChartBoard({ chart, onStarSelect, onPalaceSelect, onSiHuaClick }: ChartBoardProps) {
+const SIHUA_ORDER = ['禄', '权', '科', '忌'] as const;
+const SIHUA_COLORS: Record<string, string> = {
+  禄: 'var(--lu)', 权: 'var(--quan)', 科: 'var(--ke)', 忌: 'var(--ji)',
+};
+
+export default function ChartBoard({
+  chart, timeView, liunianYear, onTimeViewChange, onLiunianYearChange,
+  onStarSelect, onPalaceSelect, onSiHuaClick,
+}: ChartBoardProps) {
   const [selectedBranch, setSelectedBranch] = useState<number | null>(null);
-  const [timeView, setTimeView] = useState<TimeView>('mingpan');
-  const [liunianYear, setLiunianYear] = useState<number>(new Date().getFullYear());
-  const { m, ganzhi } = useLocale();
+  const { m, ganzhi, termStr } = useLocale();
 
   const palaceMap: Record<number, Palace> = {};
   chart.palaces.forEach(p => { palaceMap[p.branch] = p; });
 
   // 计算当前叠加四化数据（大限或流年）
   const currentDx = chart.daXians[chart.currentDaXianIndex];
-  const overlayData: Record<string, string> = (() => {
+  // 叠加四化所用天干：大限取大限宫的宫干，流年取年干
+  const overlayStem: number | null = (() => {
     if (timeView === 'daxian' && currentDx) {
       const dxPalace = chart.palaces.find(p => p.branch === currentDx.palaceBranch);
-      if (dxPalace) return buildSiHuaOverlay(dxPalace.stem);
+      if (dxPalace) return dxPalace.stem;
     }
-    if (timeView === 'liunian') {
-      return buildSiHuaOverlay(getYearStemIndex(liunianYear));
-    }
-    return {};
+    if (timeView === 'liunian') return getYearStemIndex(liunianYear);
+    return null;
   })();
+  const overlayData: Record<string, string> = overlayStem === null ? {} : buildSiHuaOverlay(overlayStem);
+  const overlayHead = overlayStem === null ? '' : m.timeNav.overlayHead(
+    timeView === 'daxian' && currentDx ? m.timeNav.daXianRange(currentDx.startAge, currentDx.endAge) : m.timeNav.yearLabel(liunianYear),
+    termText(ganzhi(STEMS[overlayStem])),
+  );
   const overlayLabel = timeView === 'daxian' ? '限' : timeView === 'liunian' ? '年' : undefined;
 
   const handlePalaceClick = (branch: number) => {
@@ -91,28 +107,37 @@ export default function ChartBoard({ chart, onStarSelect, onPalaceSelect, onSiHu
 
   return (
     <div className="w-full select-none">
-      {/* 时间导航轴 */}
-      <TimeNav
-        chart={chart}
-        view={timeView}
-        liunianYear={liunianYear}
-        onViewChange={setTimeView}
-        onYearChange={setLiunianYear}
-      />
-
-      {/* 命盘标题 */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-3"
-      >
-        <div className="text-[10px] tracking-[0.5em] uppercase mb-1" style={{ color: 'var(--t-faint)' }}>
-          Zi Wei Dou Shu
-        </div>
-        <h2 className="text-sm tracking-[0.25em] font-medium" style={{ color: 'var(--t-gold)' }}>
+      {/* 盘头：标题 + 本命 / 大限 / 流年 */}
+      <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
+        <h2 className="text-[15px] font-semibold" style={{ color: 'var(--t-text)' }}>
           {chart.birthInfo.name ? `${chart.birthInfo.name} · ` : ''}{m.chart.title}
         </h2>
-      </motion.div>
+        <TimeNav
+          chart={chart}
+          view={timeView}
+          liunianYear={liunianYear}
+          onViewChange={onTimeViewChange}
+          onYearChange={onLiunianYearChange}
+        />
+      </div>
+
+      {/* 叠加四化说明：本命时保留同高占位，切换时盘面不跳动 */}
+      <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mb-2 min-h-[20px] text-[12px]">
+        {overlayStem !== null && (
+          <>
+            <span style={{ color: 'var(--t-text2)' }}>{overlayHead}</span>
+            {SIHUA_ORDER.map(sh => {
+              const starName = Object.keys(overlayData).find(k => overlayData[k] === sh);
+              if (!starName) return null;
+              return (
+                <span key={sh} className="font-medium" style={{ color: SIHUA_COLORS[sh] }}>
+                  {m.timeNav.starSihua(termStr(starName), termStr(`化${sh}`))}
+                </span>
+              );
+            })}
+          </>
+        )}
+      </div>
 
       {/* 4x4 命盘网格（含 SVG 叠加层） */}
       <div
