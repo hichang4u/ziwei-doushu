@@ -228,12 +228,12 @@ export default function StarDetailPanel({ star, palaceName, onClose }: StarDetai
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold" style={{ color: 'var(--t-gold)' }}><Term name={star.name} /></span>
               {typeConfig && (
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${typeConfig.color}`}>
+                <span className={`text-[12px] px-1.5 py-0.5 rounded-full border ${typeConfig.color}`}>
                   {t.types[star.type]}
                 </span>
               )}
               {star.siHua && (
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${siHuaColors[star.siHua] || ''}`}>
+                <span className={`text-[12px] px-1.5 py-0.5 rounded-full border font-medium ${siHuaColors[star.siHua] || ''}`}>
                   {termStr(`化${star.siHua}`)}
                 </span>
               )}
@@ -246,7 +246,7 @@ export default function StarDetailPanel({ star, palaceName, onClose }: StarDetai
             {desc && (
               <div className="flex flex-wrap gap-1.5">
                 {tags.map(tag => (
-                  <div key={tag.text} className="text-[10px] px-2 py-1 rounded-full"
+                  <div key={tag.text} className="text-[12px] px-2 py-1 rounded-full"
                     style={{
                       border: '1px solid var(--t-border)',
                       color: tag.tone === 'bright' ? '#eab308' : tag.tone === 'dim' ? '#ef4444' : 'var(--t-text2)',
@@ -260,10 +260,10 @@ export default function StarDetailPanel({ star, palaceName, onClose }: StarDetai
             {/* 关键词 */}
             {desc && (
               <div>
-                <div className="text-[10px] tracking-widest mb-1.5" style={{ color: 'var(--t-faint)' }}>{t.traits}</div>
+                <div className="text-[12px] tracking-widest mb-1.5" style={{ color: 'var(--t-faint)' }}>{t.traits}</div>
                 <div className="flex flex-wrap gap-1.5">
                   {desc.keywords.split('·').map(k => (
-                    <span key={k} className="text-[11px] px-2 py-0.5 rounded-full"
+                    <span key={k} className="text-[13px] px-2 py-0.5 rounded-full"
                       style={{ color: 'var(--t-gold)', border: '1px solid rgba(212,168,67,0.2)', background: 'rgba(212,168,67,0.06)' }}>
                       {k.trim()}
                     </span>
@@ -275,10 +275,10 @@ export default function StarDetailPanel({ star, palaceName, onClose }: StarDetai
             {/* 古书原文 */}
             {detail && (
               <div className="rounded-xl p-3" style={{ background: 'rgba(212,168,67,0.04)', border: '1px solid rgba(212,168,67,0.12)' }}>
-                <div className="text-[10px] tracking-widest mb-1.5 flex items-center gap-1" style={{ color: 'var(--t-gold)', opacity: 0.7 }}>
+                <div className="text-[12px] tracking-widest mb-1.5 flex items-center gap-1" style={{ color: 'var(--t-gold)' }}>
                   {t.classical}
                 </div>
-                <p className="text-[11px] leading-relaxed italic" style={{ color: 'var(--t-gold)', opacity: 0.8 }}>{detail.classical}</p>
+                <p className="text-[13px] leading-relaxed italic" style={{ color: 'var(--t-gold)' }}>{detail.classical}</p>
               </div>
             )}
 
@@ -286,7 +286,7 @@ export default function StarDetailPanel({ star, palaceName, onClose }: StarDetai
             {detail && (
               <>
                 <div>
-                  <div className="text-[10px] tracking-widest mb-1.5 flex items-center gap-1.5" style={{ color: 'var(--t-faint)' }}>
+                  <div className="text-[12px] tracking-widest mb-1.5 flex items-center gap-1.5" style={{ color: 'var(--t-faint)' }}>
                     <span className="w-3 h-px inline-block" style={{ background: 'var(--t-border-acc)' }} />
                     {t.niHaixia}
                     <span className="w-3 h-px inline-block" style={{ background: 'var(--t-border-acc)' }} />
@@ -302,21 +302,21 @@ export default function StarDetailPanel({ star, palaceName, onClose }: StarDetai
                     { label: t.health, value: detail.health, icon: '☯' },
                   ].map(item => (
                     <div key={item.label} className="card-inner rounded-lg p-3">
-                      <div className="text-[10px] mb-1 flex items-center gap-1" style={{ color: 'var(--t-faint)' }}>
+                      <div className="text-[12px] mb-1 flex items-center gap-1" style={{ color: 'var(--t-faint)' }}>
                         <span>{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
-                      <p className="text-[11px] leading-relaxed" style={{ color: 'var(--t-text2)' }}>{item.value}</p>
+                      <p className="text-[13px] leading-relaxed" style={{ color: 'var(--t-text2)' }}>{item.value}</p>
                     </div>
                   ))}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="text-[10px] p-2.5 rounded-lg" style={{ border: '1px solid rgba(74,222,128,0.15)', background: 'rgba(74,222,128,0.05)' }}>
+                  <div className="text-[12px] p-2.5 rounded-lg" style={{ border: '1px solid rgba(74,222,128,0.15)', background: 'rgba(74,222,128,0.05)' }}>
                     <div className="text-emerald-500 mb-0.5 font-medium">{t.bestPalace}</div>
                     <div className="text-emerald-500/70">{detail.bestPalace}</div>
                   </div>
-                  <div className="text-[10px] p-2.5 rounded-lg" style={{ border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)' }}>
+                  <div className="text-[12px] p-2.5 rounded-lg" style={{ border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)' }}>
                     <div className="text-red-500 mb-0.5 font-medium">{t.worstPalace}</div>
                     <div className="text-red-500/70">{detail.worstPalace}</div>
                   </div>

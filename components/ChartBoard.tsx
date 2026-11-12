@@ -145,7 +145,7 @@ export default function ChartBoard({
       <div
         className="grid rounded-xl overflow-hidden relative"
         style={{
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
           gridTemplateRows: 'repeat(4, auto)',
           gap: '1px',
           background: 'var(--t-border)',
@@ -188,11 +188,11 @@ export default function ChartBoard({
           </div>
 
           <div className="text-center space-y-1">
-            <div className="text-[9px] tracking-[0.3em] font-medium" style={{ color: 'var(--t-gold)' }}>{m.chart.centerTitle}</div>
-            <div className="text-[10px] space-y-0.5" style={{ color: 'var(--t-faint)' }}>
-              <div>{m.chart.mingGong} <span style={{ color: 'var(--t-gold)', opacity: 0.7 }}>{ganzhi(BRANCHES[chart.mingGongBranch]).main}</span></div>
+            <div className="text-[11px] tracking-[0.3em] font-medium" style={{ color: 'var(--t-gold)' }}>{m.chart.centerTitle}</div>
+            <div className="text-[12px] space-y-0.5" style={{ color: 'var(--t-faint)' }}>
+              <div>{m.chart.mingGong} <span style={{ color: 'var(--t-gold)' }}>{ganzhi(BRANCHES[chart.mingGongBranch]).main}</span></div>
               <div>{m.chart.shenGong} <span className="text-sky-500/70">{ganzhi(BRANCHES[chart.shenGongBranch]).main}</span></div>
-              <div className="text-[9px]" style={{ color: 'var(--t-gold)', opacity: 0.75 }}><Term name={chart.wuxingJuName} /></div>
+              <div className="text-[11px]" style={{ color: 'var(--t-gold)' }}><Term name={chart.wuxingJuName} /></div>
             </div>
           </div>
 
@@ -201,14 +201,14 @@ export default function ChartBoard({
             return (
               <div className="border border-purple-500/30 rounded-lg px-3 py-1.5 text-center"
                 style={{ background: 'rgba(147,51,234,0.06)' }}>
-                <div className="text-[8px] text-purple-500/80 mb-0.5 tracking-wider">{m.chart.currentDaXian}</div>
+                <div className="text-[10px] text-purple-400 mb-0.5 tracking-wider">{m.chart.currentDaXian}</div>
                 <div className="text-[12px] text-purple-400 font-medium tabular-nums">{m.chart.ageRange(dx.startAge, dx.endAge)}</div>
-                <div className="text-[9px] text-purple-500/60"><Term name={dx.palaceName} /></div>
+                <div className="text-[11px] text-purple-400"><Term name={dx.palaceName} /></div>
               </div>
             );
           })()}
 
-          <div className="text-[8px] text-center leading-relaxed font-mono" style={{ color: 'var(--t-faint)', opacity: 0.75 }}>
+          <div className="text-[10px] text-center leading-relaxed font-mono" style={{ color: 'var(--t-faint)' }}>
             {chart.lunarInfo.lunarYear}·{chart.lunarInfo.isLeapMonth ? m.chart.leap : ''}
             {chart.lunarInfo.lunarMonth}·{chart.lunarInfo.lunarDay}
           </div>
@@ -296,7 +296,7 @@ export default function ChartBoard({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7 }}
-        className="mt-3 flex items-center justify-center gap-2 text-[9px] flex-wrap"
+        className="mt-3 flex items-center justify-center gap-2 text-[11px] flex-wrap"
       >
         {[
           { h: '化禄', c: 'text-emerald-500 border-emerald-500/30' },
@@ -316,7 +316,7 @@ export default function ChartBoard({
           type="button"
           aria-pressed={showMisc}
           onClick={() => setShowMisc(v => !v)}
-          className="px-2 py-0.5 rounded-full font-medium transition-colors"
+          className="px-3 py-2 rounded-full font-medium transition-colors"
           style={{ color: 'var(--t-gold)', border: '1px solid var(--t-border-acc)' }}
         >
           {showMisc ? m.chart.hideMisc : m.chart.showMisc}

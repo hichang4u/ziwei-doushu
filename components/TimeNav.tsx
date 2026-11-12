@@ -66,7 +66,7 @@ export default function TimeNav({
           type="button"
           aria-label="-1"
           onClick={() => shiftYear(-1)}
-          className="pl-2 pr-1 py-1 text-[12px]"
+          className="min-w-[36px] min-h-[36px] text-[14px] leading-none"
           style={{ color: 'var(--t-faint)' }}
         >
           ‹
@@ -76,7 +76,7 @@ export default function TimeNav({
           role="tab"
           aria-selected={view === 'liunian'}
           onClick={() => onViewChange('liunian')}
-          className="py-1 text-[12px] font-medium tabular-nums"
+          className="py-2 text-[12px] font-medium tabular-nums"
         >
           {m.timeNav.liuNian} {liunianYear}
         </button>
@@ -84,7 +84,7 @@ export default function TimeNav({
           type="button"
           aria-label="+1"
           onClick={() => shiftYear(1)}
-          className="pl-1 pr-2 py-1 text-[12px]"
+          className="min-w-[36px] min-h-[36px] text-[14px] leading-none"
           style={{ color: 'var(--t-faint)' }}
         >
           ›
@@ -112,7 +112,7 @@ function TabButton({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className="px-3 py-1 text-[12px] font-medium rounded-md transition-colors whitespace-nowrap"
+      className="px-3 py-2 text-[12px] font-medium rounded-md transition-colors whitespace-nowrap"
       style={active ? ACTIVE_STYLE : INACTIVE_STYLE}
     >
       {children}

@@ -185,6 +185,7 @@ export const ko: Messages = {
     copyTitle: 'AI 해석용 복사',
     copyWithQuestion: '질문 + 명반',
     copyDataOnly: '명반만',
+    copyPreviewLabel: '복사될 질문',
     sendCopy: '복사',
     copied: '복사했습니다',
     copyFailed: '복사 실패',

@@ -105,6 +105,33 @@
   --t-gold:       var(--ac);
   --t-border:     var(--bdr-med);
   --t-border-acc: var(--ac-bdr);
+
+  /* 盘面星曜（亮色主题）：原先写死暗色主题的 amber-300 / sky-500 等，亮底上看不清 */
+  --star-bright: #7a5200;
+  --star-normal: #9a6a0c;
+  --star-dim:    #746444;
+  --star-lucky:  #0b6aa0;
+  --star-sha:    #b42318;
+}
+[data-theme="dark"] {
+  /* 四化语义色：:root 里的是亮色主题的深色值，暗底上对比不足，这里给暗色主题的亮色值 */
+  --lu:   #34d399;
+  --quan: #60a5fa;
+  --ke:   #facc15;
+  --ji:   #f87171;
+
+  --star-bright: #fcd34d;
+  --star-normal: #f0a52a;
+  --star-dim:    #b08a48;
+  --star-lucky:  #4cc0f4;
+  --star-sha:    #f87171;
+}
+
+/* 宫位、星名可用键盘操作：只在键盘聚焦时显示焦点环 */
+.zw-cell:focus-visible,
+.zw-cell [role="button"]:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: -2px;
 }
 
 /* 同上：组件引用但从未定义的卡片类 */

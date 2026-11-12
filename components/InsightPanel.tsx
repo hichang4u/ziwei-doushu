@@ -42,7 +42,7 @@ function AiContent({ text, streaming }: { text: string; streaming?: boolean }) {
         if (sectionMatch) {
           return (
             <div key={i} className="pt-3 pb-0.5 first:pt-0">
-              <span className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--t-gold)' }}>
+              <span className="text-[13px] font-semibold tracking-wide" style={{ color: 'var(--t-gold)' }}>
                 【{sectionMatch[1]}】
               </span>
             </div>
@@ -51,7 +51,7 @@ function AiContent({ text, streaming }: { text: string; streaming?: boolean }) {
         if (line.trim() === '') return <div key={i} className="h-1" />;
         const parts = line.split(/\*\*(.+?)\*\*/);
         return (
-          <div key={i} className="text-[11px] leading-relaxed" style={{ color: 'var(--t-text2)' }}>
+          <div key={i} className="text-[13px] leading-relaxed" style={{ color: 'var(--t-text2)' }}>
             {parts.map((part, j) =>
               j % 2 === 0
                 ? part
@@ -63,7 +63,7 @@ function AiContent({ text, streaming }: { text: string; streaming?: boolean }) {
       {streaming && (
         <span
           className="inline-block w-1.5 h-3 ml-0.5 animate-pulse rounded-sm align-middle"
-          style={{ background: 'var(--t-gold)', opacity: 0.6 }}
+          style={{ background: 'var(--t-gold)' }}
         />
       )}
     </div>
@@ -260,7 +260,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
 
       {/* ── Topic buttons ── */}
       <div className="flex-shrink-0 px-2 pt-2.5 pb-2" style={{ borderBottom: '1px solid var(--t-border)' }}>
-        <div className="grid grid-cols-6 gap-1">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1">
           {TOPIC_KEYS.map(key => {
             const isActive = activeTopic === key;
             return (
@@ -268,7 +268,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
                 key={key}
                 onClick={() => handleTopicClick(key)}
                 disabled={loading}
-                className="py-1.5 text-[10px] font-medium rounded-lg transition-all duration-150 disabled:opacity-40"
+                className="py-2 text-[12px] font-medium rounded-lg transition-all duration-150 disabled:opacity-40"
                 style={{
                   background: isActive ? 'rgba(212,168,67,0.12)' : 'transparent',
                   border: `1px solid ${isActive ? 'rgba(212,168,67,0.3)' : 'var(--t-border)'}`,
@@ -283,20 +283,20 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
 
         {/* ── 复制给 AI：开源版无 /api/interpret 时的替代路径 ── */}
         <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] font-medium" style={{ color: 'var(--t-gold)' }}>{t.copyTitle}</span>
+          <span className="text-[12px] font-medium" style={{ color: 'var(--t-gold)' }}>{t.copyTitle}</span>
           {(['question', 'data'] as const).map(kind => (
             <button
               key={kind}
               type="button"
               onClick={() => handleCopy(kind)}
-              className="px-2 py-1 text-[10px] rounded-md transition-colors"
+              className="px-3 py-2 text-[12px] rounded-md transition-colors"
               style={{ border: '1px solid var(--t-border)', color: 'var(--t-text2)' }}
             >
               {copyState?.kind === kind ? (copyState.ok ? `✓ ${t.copied}` : t.copyFailed) : (kind === 'question' ? t.copyWithQuestion : t.copyDataOnly)}
             </button>
           ))}
         </div>
-        <p className="mt-1 text-[10px] leading-snug" style={{ color: 'var(--t-faint)' }}>{t.copyHint}</p>
+        <p className="mt-1 text-[12px] leading-snug" style={{ color: 'var(--t-faint)' }}>{t.copyHint}</p>
       </div>
 
       {/* ── Messages ── */}
@@ -306,12 +306,27 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="text-4xl mb-3" style={{ color: 'var(--t-gold)', opacity: 0.1 }}>✦</div>
-            <p className="text-[10px] animate-pulse" style={{ color: 'var(--t-faint)' }}>{t.loading}</p>
+            <p className="text-[12px] animate-pulse" style={{ color: 'var(--t-faint)' }}>{t.loading}</p>
+          </div>
+        )}
+
+        {apiMissing && (
+          <div className="space-y-3">
+            <p className="text-[12px] leading-relaxed" style={{ color: 'var(--t-text2)' }}>{t.apiMissing}</p>
+            <div>
+              <div className="text-[11px] mb-1" style={{ color: 'var(--t-faint)' }}>{t.copyPreviewLabel}</div>
+              <pre
+                className="text-[12px] leading-relaxed whitespace-pre-wrap rounded-lg p-3 max-h-56 overflow-y-auto"
+                style={{ border: '1px solid var(--t-border)', color: 'var(--t-text)', fontFamily: 'inherit' }}
+              >
+                {input.trim() || currentPrompt || prompts.topics.overview}
+              </pre>
+            </div>
           </div>
         )}
 
         <AnimatePresence initial={false}>
-          {messages.map((msg, i) => {
+          {!apiMissing && messages.map((msg, i) => {
             if (msg.role === 'user' && msg.hidden) return null;
 
             if (msg.role === 'user') {
@@ -323,7 +338,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
                   className="flex justify-end"
                 >
                   <div
-                    className="max-w-[85%] rounded-xl px-3 py-2 text-[11px]"
+                    className="max-w-[85%] rounded-xl px-3 py-2 text-[13px]"
                     style={{
                       background: 'rgba(212,168,67,0.08)',
                       border: '1px solid rgba(212,168,67,0.18)',
@@ -345,7 +360,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
                 animate={{ opacity: 1, y: 0 }}
               >
                 <div
-                  className="text-[9px] tracking-widest mb-2 flex items-center gap-1.5"
+                  className="text-[11px] tracking-widest mb-2 flex items-center gap-1.5"
                   style={{ color: 'var(--t-faint)' }}
                 >
                   <span style={{ color: 'var(--t-gold)', opacity: 0.4 }}>✦</span>
@@ -368,7 +383,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder={t.placeholder}
             disabled={loading}
-            className="flex-1 rounded-lg px-3 py-2 text-[11px] focus:outline-none transition-colors"
+            className="flex-1 rounded-lg px-3 py-2 text-[13px] focus:outline-none transition-colors"
             style={{
               background: 'var(--t-card)',
               border: '1px solid var(--t-border)',
@@ -378,7 +393,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="px-3 py-2 rounded-lg text-[11px] font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3 py-2 rounded-lg text-[13px] font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
               background: 'rgba(212,168,67,0.15)',
               border: '1px solid rgba(212,168,67,0.25)',

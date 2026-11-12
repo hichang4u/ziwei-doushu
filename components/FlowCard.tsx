@@ -64,17 +64,17 @@ export default function FlowCard({ chart, year, onYearChange }: FlowCardProps) {
               style={{
                 border: `1px solid ${current ? 'var(--t-gold)' : 'var(--t-border)'}`,
                 background: current ? 'var(--ac-bg)' : 'transparent',
-                opacity: past ? 0.55 : 1,
+                opacity: past ? 0.7 : 1,
               }}
             >
-              <div className="flex items-center justify-between gap-1 text-[11px] tabular-nums" style={{ color: current ? 'var(--t-gold)' : 'var(--t-text2)' }}>
+              <div className="flex items-center justify-between gap-1 text-[13px] tabular-nums" style={{ color: current ? 'var(--t-gold)' : 'var(--t-text2)' }}>
                 <span>{m.chart.ageRange(dx.startAge, dx.endAge)}</span>
-                {current && <span className="text-[9px] font-bold">{f.now}</span>}
+                {current && <span className="text-[11px] font-bold">{f.now}</span>}
               </div>
               <div className="text-[13px] font-medium truncate" style={{ color: 'var(--t-text)' }}><Term name={dx.palaceName} /></div>
-              <div className="text-[10px] truncate" style={{ color: 'var(--t-text2)' }}>{role(dx.palaceName)}</div>
+              <div className="text-[12px] truncate" style={{ color: 'var(--t-text2)' }}>{role(dx.palaceName)}</div>
               {startYear !== null && (
-                <div className="text-[9px] tabular-nums" style={{ color: 'var(--t-faint)' }}>{f.fromYear(startYear)}</div>
+                <div className="text-[11px] tabular-nums" style={{ color: 'var(--t-faint)' }}>{f.fromYear(startYear)}</div>
               )}
             </li>
           );
@@ -93,7 +93,7 @@ export default function FlowCard({ chart, year, onYearChange }: FlowCardProps) {
               type="button"
               aria-label={label}
               onClick={() => onYearChange(year + d)}
-              className="w-6 h-6 rounded-md text-[13px] leading-none"
+              className="w-9 h-9 rounded-md text-[15px] leading-none"
               style={{ border: '1px solid var(--t-border)', color: 'var(--t-text2)' }}
             >
               {glyph}
@@ -134,7 +134,7 @@ export default function FlowCard({ chart, year, onYearChange }: FlowCardProps) {
             <li
               key={mo.month}
               aria-current={current ? 'true' : undefined}
-              className="rounded-lg px-2 py-1.5 text-[11px]"
+              className="rounded-lg px-2 py-1.5 text-[13px]"
               style={{
                 border: `1px solid ${current ? 'var(--t-gold)' : 'var(--t-border)'}`,
                 background: current ? 'var(--ac-bg)' : 'transparent',
@@ -144,7 +144,7 @@ export default function FlowCard({ chart, year, onYearChange }: FlowCardProps) {
                 <span className="font-medium" style={{ color: current ? 'var(--t-gold)' : 'var(--t-text)' }}>
                   {f.monthLabel(mo.month)}{current && ` · ${f.now}`}
                 </span>
-                <span className="text-[9px] tabular-nums" style={{ color: 'var(--t-faint)' }}>
+                <span className="text-[11px] tabular-nums" style={{ color: 'var(--t-faint)' }}>
                   {f.solarFrom(mo.solarStart.month, mo.solarStart.day)}
                 </span>
               </div>
@@ -155,7 +155,7 @@ export default function FlowCard({ chart, year, onYearChange }: FlowCardProps) {
         })}
       </ol>
 
-      <p className="mt-3 text-[11px] leading-snug" style={{ color: 'var(--t-faint)' }}>{f.rule}</p>
+      <p className="mt-3 text-[13px] leading-snug" style={{ color: 'var(--t-faint)' }}>{f.rule}</p>
     </section>
   );
 }

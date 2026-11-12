@@ -102,29 +102,58 @@ export function Term({ name, kind = 'term', subClassName }: {
   );
 }
 
-/** 左下方浮动的语言 / 术语显示切换（右下角会盖住解读面板的发送按钮） */
+/**
+ * 左下角的语言 / 术语显示切换。平时只是一个小圆钮（显示当前语言），点开才展开选项，
+ * 免得常驻的长条盖住表单按钮和正文。右下角会盖住解读面板的发送按钮，所以放左下。
+ */
 export function LocaleSwitcher() {
   const { locale, setLocale, termStyle, setTermStyle, m } = useLocale();
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
   const pill = (active: boolean): React.CSSProperties => ({
-    padding: '3px 9px',
+    padding: '8px 14px',
     borderRadius: '999px',
-    fontSize: '11px',
+    fontSize: '13px',
     cursor: 'pointer',
     border: 'none',
     background: active ? 'rgba(212,168,67,0.18)' : 'transparent',
     color: active ? 'var(--t-gold, #d4a843)' : 'var(--t-faint, #888)',
   });
+  const surface: React.CSSProperties = {
+    border: '1px solid var(--t-border, rgba(128,128,128,0.3))',
+    background: 'var(--bg-1, rgba(20,20,30,0.92))',
+    boxShadow: 'var(--sh-sm)',
+  };
   return (
+    <div
+      style={{
+        // 开发模式下 next dev 的指示徽标占着左下角，往上让开；正式环境贴底
+        position: 'fixed', left: 16, bottom: process.env.NODE_ENV === 'development' ? 64 : 16, zIndex: 60,
+        display: 'flex', flexDirection: 'column-reverse', alignItems: 'flex-start', gap: 6,
+      }}
+    >
+      <button
+        type="button"
+        aria-label={m.locale.switchLabel}
+        aria-expanded={open}
+        onClick={() => setOpen(o => !o)}
+        style={{
+          ...surface, width: 40, height: 40, borderRadius: 999, cursor: 'pointer',
+          fontSize: 14, fontWeight: 600, color: 'var(--t-gold, #d4a843)',
+        }}
+      >
+        {locale === 'ko' ? '한' : '中'}
+      </button>
+      {open && (
     <div
       role="group"
       aria-label={m.locale.switchLabel}
-      style={{
-        // bottom 64：让开 next dev 左下角的开发指示徽标（仅开发模式），首页 / 合盘页顶部有固定导航
-        position: 'fixed', left: 16, bottom: 64, zIndex: 60,
-        display: 'flex', alignItems: 'center', gap: 4, padding: 4,
-        borderRadius: 999, border: '1px solid var(--t-border, rgba(128,128,128,0.3))',
-        background: 'var(--t-surface, rgba(20,20,30,0.85))', backdropFilter: 'blur(12px)',
-      }}
+      style={{ ...surface, display: 'flex', alignItems: 'center', gap: 4, padding: 4, borderRadius: 999 }}
     >
       <button type="button" style={pill(locale === 'zh')} onClick={() => setLocale('zh')} lang="zh-CN">中文</button>
       <button type="button" style={pill(locale === 'ko')} onClick={() => setLocale('ko')} lang="ko">한국어</button>
@@ -134,7 +163,7 @@ export function LocaleSwitcher() {
           value={termStyle}
           onChange={(e) => setTermStyle(e.target.value as TermStyle)}
           style={{
-            fontSize: '11px', padding: '2px 4px', borderRadius: 8,
+            fontSize: '13px', padding: '7px 6px', borderRadius: 8,
             background: 'transparent', color: 'var(--t-faint, #888)',
             border: '1px solid var(--t-border, rgba(128,128,128,0.3))',
           }}
@@ -143,6 +172,8 @@ export function LocaleSwitcher() {
           <option value="hangul">자미</option>
           <option value="hanja">紫微</option>
         </select>
+      )}
+    </div>
       )}
     </div>
   );

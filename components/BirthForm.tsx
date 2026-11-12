@@ -210,7 +210,8 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
     transition: 'border-color 0.2s',
   } as React.CSSProperties;
 
-  const errorInputStyle = { ...inputStyle, borderColor: errorClr };
+  // 与 inputStyle 一样用 border 简写：混用 border 与 borderColor，React 在重渲染时会告警并可能丢样式
+  const errorInputStyle = { ...inputStyle, border: `1px solid ${errorClr}` };
 
   function FieldError({ msg }: { msg: string }) {
     return (
@@ -234,6 +235,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
 
   return (
     <motion.form
+      noValidate
       onSubmit={handleSubmit}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}

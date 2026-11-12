@@ -25,7 +25,7 @@ export default function MingSummaryCard({ chart }: { chart: ZiweiChart }) {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0">
           <span
-            className="inline-block text-[10px] px-1.5 py-0.5 rounded-full mb-1.5"
+            className="inline-block text-[12px] px-1.5 py-0.5 rounded-full mb-1.5"
             style={{ color: 'var(--t-faint)', border: '1px solid var(--t-border)' }}
           >
             {e.tag}
@@ -38,7 +38,7 @@ export default function MingSummaryCard({ chart }: { chart: ZiweiChart }) {
           {types.flatMap(t => t.keywords).map((k, i) => (
             <span
               key={`${k}-${i}`}
-              className="text-[11px] px-2 py-0.5 rounded-full"
+              className="text-[13px] px-2 py-0.5 rounded-full"
               style={{ color: 'var(--t-text2)', background: 'var(--t-surface)', border: '1px solid var(--t-border)' }}
             >
               {k}
@@ -75,14 +75,14 @@ export default function MingSummaryCard({ chart }: { chart: ZiweiChart }) {
       </dl>
 
       <div className="mt-2 flex items-end justify-between gap-3">
-        <p className="text-[11px] leading-snug" style={{ color: 'var(--t-faint)' }}>
+        <p className="text-[13px] leading-snug" style={{ color: 'var(--t-faint)' }}>
           {borrowedFrom && <>{e.borrowed(termStr(borrowedFrom))} · </>}
           {e.note}
         </p>
         <button
           type="button"
           onClick={() => setShareOpen(true)}
-          className="flex-shrink-0 px-2.5 py-1 rounded-lg text-[12px] font-medium"
+          className="flex-shrink-0 px-3 py-2 rounded-lg text-[13px] font-medium"
           style={{ color: 'var(--t-gold)', border: '1px solid var(--t-border-acc)' }}
         >
           {e.share.open}

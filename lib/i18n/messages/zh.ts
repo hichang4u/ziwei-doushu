@@ -189,6 +189,7 @@ export const zh = {
     copyTitle: '复制给 AI 解读',
     copyWithQuestion: '提问 + 命盘',
     copyDataOnly: '仅命盘',
+    copyPreviewLabel: '将复制的提问',
     sendCopy: '复制',
     copied: '已复制',
     copyFailed: '复制失败',
