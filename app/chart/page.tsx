@@ -6,6 +6,7 @@ import InsightPanel from '@/components/InsightPanel';
 import PatternsCard from '@/components/PatternsCard';
 import StarDetailPanel from '@/components/StarDetailPanel';
 import MingSummaryCard from '@/components/MingSummaryCard';
+import FlowCard from '@/components/FlowCard';
 import type { TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
 import { useLocale } from '@/components/LocaleProvider';
@@ -79,6 +80,10 @@ export default function ChartPage() {
               onPalaceSelect={setSelectedPalace}
               onStarSelect={(star, palace) => setSelectedStar({ star, palaceName: palace.name })}
             />
+          </div>
+          {/* 大限时间轴 + 流年要点 + 流月：年份与盘头的流年切换共用 */}
+          <div style={{ marginTop: 16 }}>
+            <FlowCard chart={chart} year={liunianYear} onYearChange={setLiunianYear} />
           </div>
           {/* 规则格局识别：不依赖 AI 接口，开源版也能看到 */}
           <div style={{ marginTop: 16 }}><PatternsCard chart={chart} /></div>

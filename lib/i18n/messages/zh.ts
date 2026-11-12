@@ -93,6 +93,27 @@ export const zh = {
       财帛: '钱财·收入', 疾厄: '健康', 迁移: '外出·人际', 仆役: '朋友·人脉',
       官禄: '事业·工作', 田宅: '家·房产', 福德: '心境·爱好', 父母: '父母·长辈',
     } as Record<string, string>,
+    /** 盘面下方：大限时间轴、流年要点、流月 */
+    flow: {
+      title: '运势走向',
+      daXianTitle: '大限（十年一段）',
+      now: '现在',
+      fromYear: (y: number) => `${y}年起`,
+      yearTitle: (y: number, gz: string) => `${y}年 ${gz} 要点`,
+      yearMing: '流年命宫',
+      yearMingNote: '这一年的重心',
+      prevYear: '上一年',
+      nextYear: '下一年',
+      sihuaMeaning: {
+        禄: '机会、财缘聚在这里', 权: '主导权、冲劲落在这里', 科: '名声、贵人助力在这里', 忌: '这里容易卡住、放不下，多留意',
+      } as Record<string, string>,
+      monthTitle: '流月（农历）',
+      monthLabel: (mo: number) => `农历${mo}月`,
+      solarFrom: (mo: number, d: number) => `公历 ${mo}/${d} 起`,
+      up: '机会',
+      down: '留意',
+      rule: '规则：只标出该年、该月天干的四化落在本命盘的哪一宫（流月用五虎遁月干），不评吉凶大小。闰月并入本月。',
+    },
   },
   timeNav: {
     natal: '本命',

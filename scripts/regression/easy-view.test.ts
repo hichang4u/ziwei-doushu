@@ -5,12 +5,16 @@
  * ② 命宫类型：单星 / 双星 / 空宫借对宫，各取一例；并遍历一批盘，保证每张盘都能起出类型。
  * ③ 杂曜分组：六吉禄马、六煞不算杂曜；主星不算杂曜。
  * ④ 十二宫白话：中韩两份都覆盖引擎的 12 个宫名。
+ * ⑤ 运限落点（lib/ziwei/flow.ts）：流年命宫与流年四化落宫对照 rath/orrery 同盘；
+ *    流月月干按五虎遁手推（丙年正月起庚寅），月初公历日对照 2026 年春节 2 月 17 日。
  */
 import { generateChart } from '../../lib/ziwei/algorithm';
 import { STAR_TYPES, getMingType } from '../../lib/i18n/star-types';
 import { AUX_STARS, SHA6_STARS, isMiscStar } from '../../lib/ziwei/star-groups';
 import { MAJOR_STARS_KO } from '../../lib/i18n/terms-ko';
 import { MESSAGES } from '../../lib/i18n';
+import { getYearFlow, getMonthFlows, lunarYearMonthOf } from '../../lib/ziwei/flow';
+import { STEMS, BRANCHES } from '../../lib/ziwei/constants';
 
 let bad = 0;
 const fail = (m: string) => { bad++; console.log(`  ❌ ${m}`); };
@@ -88,6 +92,36 @@ const HANGUL = /[가-힣]/;
     if (missing.length || Object.keys(short).length !== 12) fail(`${locale} 宫位白话：缺 ${missing.join('、') || '无'}，共 ${Object.keys(short).length} 项`);
     else ok(`${locale} 宫位白话覆盖 12 宫`);
   }
+}
+
+/* ── ⑤ 运限落点 ───────────────────────────────────────────────── */
+{
+  const chart = generateChart({ year: 1990, month: 5, day: 15, hour: 5, gender: 'male' });
+  const show = (hits: { siHua: string; star: string; palace: { name: string } | null }[]) =>
+    hits.map((h) => `${h.siHua}${h.star}→${h.palace?.name ?? '无'}`).join(' ');
+
+  const yf = getYearFlow(chart, 2026);
+  const yGot = `${STEMS[yf.stemIndex]}${BRANCHES[yf.branchIndex]} 命宫=${yf.mingPalace?.name} ${show(yf.hits)}`;
+  const yWant = '丙午 命宫=迁移 禄天同→子女 权天机→父母 科文昌→仆役 忌廉贞→迁移';
+  if (yGot === yWant) ok(`2026 流年：${yGot}`); else fail(`2026 流年：实得「${yGot}」应为「${yWant}」`);
+
+  const mf = getMonthFlows(chart, 2026);
+  const stems = mf.map((m) => STEMS[m.stemIndex]).join('');
+  const branches = mf.map((m) => BRANCHES[m.branchIndex]).join('');
+  if (stems === '庚辛壬癸甲乙丙丁戊己庚辛' && branches === '寅卯辰巳午未申酉戌亥子丑') ok(`2026 流月干支：${stems} / ${branches}`);
+  else fail(`2026 流月干支：实得 ${stems} / ${branches}`);
+  const m1 = mf[0];
+  const m1Got = `${m1.solarStart.year}-${m1.solarStart.month}-${m1.solarStart.day} ${show(m1.hits)}`;
+  const m1Want = '2026-2-17 禄太阳→兄弟 权武曲→夫妻 科太阴→田宅 忌天同→子女';
+  if (m1Got === m1Want) ok(`2026 正月：${m1Got}`); else fail(`2026 正月：实得「${m1Got}」应为「${m1Want}」`);
+  const m12 = mf[11].solarStart;
+  if (m12.year === 2027 && m12.month === 1) ok(`2026 腊月初一落在次年公历 ${m12.year}-${m12.month}-${m12.day}`);
+  else fail(`2026 腊月初一：实得 ${m12.year}-${m12.month}-${m12.day}`);
+  if (mf.every((m) => m.hits.every((h) => h.palace))) ok('流月四化星全部能在盘上找到落宫'); else fail('流月四化有星找不到落宫');
+
+  const before = lunarYearMonthOf(new Date(2026, 1, 16)), after = lunarYearMonthOf(new Date(2026, 1, 17));
+  if (before.year === 2025 && before.month === 12 && after.year === 2026 && after.month === 1) ok('春节前后农历年月换算');
+  else fail(`春节前后：${JSON.stringify(before)} / ${JSON.stringify(after)}`);
 }
 
 if (bad) { console.log(`\n❌ easy-view 回归失败 ${bad} 项`); process.exit(1); }
