@@ -7,6 +7,7 @@
  * ④ 十二宫白话：中韩两份都覆盖引擎的 12 个宫名。
  * ⑤ 运限落点（lib/ziwei/flow.ts）：流年命宫与流年四化落宫对照 rath/orrery 同盘；
  *    流月月干按五虎遁手推（丙年正月起庚寅），月初公历日对照 2026 年春节 2 月 17 日。
+ * ⑥ 中国省名韩文表（lib/i18n/cn-provinces-ko.ts）：与 cities.ts 的省一一对应、互不重名、不含简体字。
  */
 import { generateChart } from '../../lib/ziwei/algorithm';
 import { STAR_TYPES, getMingType } from '../../lib/i18n/star-types';
@@ -15,6 +16,8 @@ import { MAJOR_STARS_KO } from '../../lib/i18n/terms-ko';
 import { MESSAGES } from '../../lib/i18n';
 import { getYearFlow, getMonthFlows, lunarYearMonthOf } from '../../lib/ziwei/flow';
 import { STEMS, BRANCHES } from '../../lib/ziwei/constants';
+import { PROVINCES } from '../../lib/ziwei/cities';
+import { CN_PROVINCES_KO } from '../../lib/i18n/cn-provinces-ko';
 
 let bad = 0;
 const fail = (m: string) => { bad++; console.log(`  ❌ ${m}`); };
@@ -122,6 +125,19 @@ const HANGUL = /[가-힣]/;
   const before = lunarYearMonthOf(new Date(2026, 1, 16)), after = lunarYearMonthOf(new Date(2026, 1, 17));
   if (before.year === 2025 && before.month === 12 && after.year === 2026 && after.month === 1) ok('春节前后农历年月换算');
   else fail(`春节前后：${JSON.stringify(before)} / ${JSON.stringify(after)}`);
+}
+
+/* ── ⑥ 中国省名韩文表 ─────────────────────────────────────────── */
+{
+  const names = PROVINCES.map((p) => p.name);
+  const missing = names.filter((n) => !CN_PROVINCES_KO[n]);
+  const extra = Object.keys(CN_PROVINCES_KO).filter((k) => !names.includes(k));
+  const labels = Object.values(CN_PROVINCES_KO);
+  if (missing.length || extra.length) fail(`省名韩文表：缺 ${missing.join('、') || '无'}，多 ${extra.join('、') || '无'}`);
+  else ok(`省名韩文表覆盖 ${names.length} 个省级行政区`);
+  if (new Set(labels).size !== labels.length) fail('省名韩文有重名（山西 / 陕西 应附汉字区分）'); else ok('省名韩文互不重名');
+  const bad = labels.filter((l) => !HANGUL.test(l) || SIMPLIFIED_ONLY.test(l));
+  if (bad.length) fail(`省名韩文含简体或无韩文：${bad.join('、')}`); else ok('省名韩文不含简体字');
 }
 
 if (bad) { console.log(`\n❌ easy-view 回归失败 ${bad} 项`); process.exit(1); }

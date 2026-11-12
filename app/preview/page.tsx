@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ScrollIntro from '@/components/ScrollIntro';
 import { useLocale } from '@/components/LocaleProvider';
+import LocaleMeta from '@/components/LocaleMeta';
 
 export default function PreviewPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function PreviewPage() {
 
   return (
     <>
+      <LocaleMeta ko={{ title: '자미 두루마리 · 오프닝 미리보기 · 자미 명반' }} />
       {/* 卷轴开场动画 */}
       <ScrollIntro key={replayKey} onComplete={() => setDone(true)} />
 

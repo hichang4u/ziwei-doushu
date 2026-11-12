@@ -131,7 +131,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
                 </OnlyIn>
               )}
               {p.translation && (
-                <div style={{
+                <OnlyIn locale="zh"><div style={{
                   marginTop: '8px',
                   marginLeft: '36px',
                   padding: '8px 12px',
@@ -143,10 +143,10 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
                 }}>
                   <span style={{ fontSize: '10px', color: 'var(--ac)', marginRight: '6px' }}>白话</span>
                   {p.translation}
-                </div>
+                </div></OnlyIn>
               )}
               {p.niNote && (
-                <div style={{
+                <OnlyIn locale="zh"><div style={{
                   marginTop: '8px',
                   marginLeft: '36px',
                   padding: '8px 12px',
@@ -158,7 +158,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
                 }}>
                   <span style={{ fontSize: '10px', color: 'var(--ji)', marginRight: '6px' }}>倪师注</span>
                   {p.niNote}
-                </div>
+                </div></OnlyIn>
               )}
             </div>
           ))}

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { BirthInfo } from '@/lib/ziwei/types';
 import { SHICHEN } from '@/lib/ziwei/constants';
@@ -7,6 +7,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { useLocale } from '@/components/LocaleProvider';
 import { PROVINCES } from '@/lib/ziwei/cities';
 import { KR_PROVINCES } from '@/lib/ziwei/cities-kr';
+import { CN_PROVINCES_KO } from '@/lib/i18n/cn-provinces-ko';
 import { formToBirthInfo, resolveFormBirthTime } from '@/lib/ziwei/share';
 import type { BirthCountry, KoreaTimeRule } from '@/lib/ziwei/birth-time';
 
@@ -51,7 +52,7 @@ function isValidDate(y: number, m: number, d: number): boolean {
 export default function BirthForm({ onSubmit, loading, initialData, onFormSave, hideSubmit }: BirthFormProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { m: msg, ganzhi } = useLocale();
+  const { m: msg, ganzhi, locale } = useLocale();
   const t = msg.form;
 
   const [form, setForm] = useState<BirthFormState>({
@@ -71,6 +72,17 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
     koreaDstClock: initialData?.koreaDstClock ?? false,
   });
   const isKorea = form.country === 'KR';
+
+  // 韩文界面默认出生国为韩国。界面语言要到水合后才确定，所以用 effect 跟随；
+  // 带初始数据（分享链接、历史记录）或用户手动选过国家后不再改动。
+  const countryChosen = useRef(initialData != null);
+  useEffect(() => {
+    if (countryChosen.current) return;
+    const want: BirthCountry = locale === 'ko' ? 'KR' : 'CN';
+    setForm(f => (f.country === want || f.province ? f : { ...f, country: want }));
+  }, [locale]);
+  // 中国省名：韩文界面显示韩文（城市名保持原文）
+  const provinceLabel = (name: string) => (locale === 'ko' && !isKorea ? CN_PROVINCES_KO[name] ?? name : name);
 
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -134,7 +146,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
   const summaryText = showSummary
     ? [
         t.summaryDate(y, m, d),
-        form.city || (form.province ? form.province : ''),
+        form.city || (form.province ? provinceLabel(form.province) : ''),
         form.unknownTime ? t.summaryUnknownTime : t.shichen(ganzhi(SHICHEN_NAMES[branch]).main),
         form.gender === 'male' ? t.summaryMale : t.summaryFemale,
       ].filter(Boolean).join(' · ')
@@ -142,6 +154,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
 
   const handleCountry = (country: BirthCountry) => {
     // 两国省市表不通用，切换时清空出生地
+    countryChosen.current = true;
     setForm({ ...form, country, province: '', city: '', longitude: 120 });
   };
 
@@ -330,7 +343,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
           >
             <option value="">{isKorea ? t.provincePlaceholderKR : t.provincePlaceholderCN}</option>
             {provinceList.map(p => (
-              <option key={p.name} value={p.name}>{p.name}</option>
+              <option key={p.name} value={p.name}>{provinceLabel(p.name)}</option>
             ))}
           </select>
           <select

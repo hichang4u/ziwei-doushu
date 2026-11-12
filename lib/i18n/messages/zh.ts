@@ -78,6 +78,12 @@ export const zh = {
     showMisc: '显示杂曜',
     hideMisc: '隐藏杂曜',
   },
+  notFound: {
+    title: '页面不存在',
+    body: '你访问的地址没有对应的页面，可能已被移动或输入有误。',
+    toHome: '回到首页',
+    toChart: '去排盘',
+  },
   /** 入门辅助：命宫结论卡、宫位白话 */
   easy: {
     tag: '趣味摘要',
