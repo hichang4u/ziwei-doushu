@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import type { Palace, Star } from '@/lib/ziwei/types';
 import { STEMS, BRANCHES } from '@/lib/ziwei/constants';
+import { isMiscStar } from '@/lib/ziwei/star-groups';
 import clsx from 'clsx';
 import { Term, useLocale } from './LocaleProvider';
 
@@ -18,6 +19,8 @@ interface PalaceCellProps {
   overlayLabel?: string;
   /** 点击叠加四化 badge 回调 */
   onSiHuaClick?: (starName: string, siHua: string) => void;
+  /** 是否显示杂曜；false 时只留主星、六吉禄马、六煞 */
+  showMisc?: boolean;
 }
 
 const SIHUA_STYLES: Record<string, string> = {
@@ -57,15 +60,19 @@ const SiHuaBadge = ({
 
 export default function PalaceCell({
   palace, onClick, onStarClick, isSelected, isSanFang, delay = 0,
-  overlayStarSiHua, overlayLabel, onSiHuaClick,
+  overlayStarSiHua, overlayLabel, onSiHuaClick, showMisc = true,
 }: PalaceCellProps) {
   const { branch, stem, name, stars, daXianAge, isCurrentDaXian, isMingGong, isShenGong } = palace;
   const { m, term } = useLocale();
   const ganzhi = `${STEMS[stem]}${BRANCHES[branch]}`;
 
   const majorStars = stars.filter(s => s.type === 'major');
-  const luckyStars = stars.filter(s => s.type === 'lucky');
-  const shaStars = stars.filter(s => s.type === 'sha');
+  const shown = (s: Star) => showMisc || !isMiscStar(s);
+  const luckyStars = stars.filter(s => s.type === 'lucky' && shown(s));
+  const shaStars = stars.filter(s => s.type === 'sha' && shown(s));
+  // 中性杂曜（劫煞、咸池等）原先盘面不显示，展开杂曜时一并列出
+  const neutralStars = showMisc ? stars.filter(s => s.type === 'minor') : [];
+  const role = m.easy.palaceShort[name];
 
   return (
     <motion.div
@@ -120,6 +127,10 @@ export default function PalaceCell({
         )}
         {isShenGong && (
           <span className="text-[7px] text-sky-500/80 border border-sky-500/30 px-0.5 rounded leading-tight">{term('身').main}</span>
+        )}
+        {/* 宫位白话：这一宫看什么 */}
+        {role && (
+          <span className="text-[9px] truncate min-w-0" style={{ color: 'var(--t-text2)' }}>{role}</span>
         )}
       </div>
 
@@ -194,6 +205,17 @@ export default function PalaceCell({
           {shaStars.map(s => (
             <span key={s.name} className="text-[9px] text-red-500/60 leading-tight">
               <Term name={s.name} />{s.siHua && <SiHuaBadge siHua={s.siHua} />}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* 中性杂曜 */}
+      {neutralStars.length > 0 && (
+        <div className="flex flex-wrap gap-x-1">
+          {neutralStars.map(s => (
+            <span key={s.name} className="text-[9px] leading-tight" style={{ color: 'var(--t-faint)' }}>
+              <Term name={s.name} />
             </span>
           ))}
         </div>

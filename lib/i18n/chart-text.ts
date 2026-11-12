@@ -7,15 +7,13 @@
  */
 import type { ZiweiChart, Palace, Star, SiHua } from '@/lib/ziwei/types';
 import { STEMS, BRANCHES, SI_HUA_TABLE } from '@/lib/ziwei/constants';
+import { AUX_STARS, SHA6_STARS, isMiscStar } from '@/lib/ziwei/star-groups';
 import { formatTerm, formatGanzhi, termText, type Locale } from './index';
 import { BRIGHTNESS_KO, BRANCHES_KO } from './terms-ko';
 
 /** 传统宫序：从命宫逆排 */
 const PALACE_ORDER = ['命宫', '兄弟', '夫妻', '子女', '财帛', '疾厄', '迁移', '仆役', '官禄', '田宅', '福德', '父母'];
 const SIHUA_ORDER: SiHua[] = ['禄', '权', '科', '忌'];
-/** 引擎的 Star.type 把杂曜也归进 lucky / sha，这里按星名重新分组 */
-const LUCKY_STARS = new Set(['左辅', '右弼', '文昌', '文曲', '天魁', '天钺', '禄存', '天马']);
-const SHA_STARS = new Set(['擎羊', '陀罗', '火星', '铃星', '地空', '地劫']);
 
 const YIN_YANG_KO: Record<string, string> = {
   阳男: '양남(陽男)', 阴男: '음남(陰男)', 阳女: '양녀(陽女)', 阴女: '음녀(陰女)',
@@ -208,9 +206,9 @@ export function chartToText(chart: ZiweiChart, locale: Locale, opts: ChartTextOp
       lines.push(`  ${L.major}: ${L.empty(palaceLabel(p.borrowedFromName), p.borrowedStars.map(term).join(L.joiner))}`);
     }
     const groups: [string, (s: Star) => boolean][] = [
-      [L.aux, (s) => LUCKY_STARS.has(s.name)],
-      [L.sha, (s) => SHA_STARS.has(s.name)],
-      [L.minor, (s) => s.type !== 'major' && !LUCKY_STARS.has(s.name) && !SHA_STARS.has(s.name)],
+      [L.aux, (s) => AUX_STARS.has(s.name)],
+      [L.sha, (s) => SHA6_STARS.has(s.name)],
+      [L.minor, isMiscStar],
     ];
     for (const [label, pick] of groups) {
       const s = group(pick);

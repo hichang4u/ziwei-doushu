@@ -74,6 +74,25 @@ export const zh = {
     leap: '闰',
     emptyPalace: '空宫',
     clickHint: '点击宫位看三方四正',
+    starHint: '点击星名看解释',
+    showMisc: '显示杂曜',
+    hideMisc: '隐藏杂曜',
+  },
+  /** 入门辅助：命宫结论卡、宫位白话 */
+  easy: {
+    tag: '趣味摘要',
+    typeSuffix: '型',
+    typeJoiner: ' × ',
+    mingStars: '命宫主星',
+    borrowed: (palace: string) => `命宫无主星，借对宫${palace}的主星`,
+    daXianNow: '当前大限',
+    shenGong: '身宫',
+    note: '类型只按命宫主星起名，方便入门；正式解读还要看三方四正与四化。',
+    palaceShort: {
+      命宫: '自我·性格', 兄弟: '手足·同伴', 夫妻: '感情·婚姻', 子女: '子女·下属',
+      财帛: '钱财·收入', 疾厄: '健康', 迁移: '外出·人际', 仆役: '朋友·人脉',
+      官禄: '事业·工作', 田宅: '家·房产', 福德: '心境·爱好', 父母: '父母·长辈',
+    } as Record<string, string>,
   },
   timeNav: {
     natal: '本命',

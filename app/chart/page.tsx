@@ -5,6 +5,7 @@ import ChartBoard from '@/components/ChartBoard';
 import InsightPanel from '@/components/InsightPanel';
 import PatternsCard from '@/components/PatternsCard';
 import StarDetailPanel from '@/components/StarDetailPanel';
+import MingSummaryCard from '@/components/MingSummaryCard';
 import type { TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
 import { useLocale } from '@/components/LocaleProvider';
@@ -66,6 +67,8 @@ export default function ChartPage() {
         }}
       >
         <div>
+          {/* 先给结论：命宫类型 + 当前大限，看不懂盘面也有收获 */}
+          <MingSummaryCard chart={chart} />
           <div className="card-glass rounded-xl p-3 sm:p-4">
             <ChartBoard
               chart={chart}

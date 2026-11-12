@@ -69,6 +69,8 @@ export default function ChartBoard({
   onStarSelect, onPalaceSelect, onSiHuaClick,
 }: ChartBoardProps) {
   const [selectedBranch, setSelectedBranch] = useState<number | null>(null);
+  // 默认精简：只显示主星、六吉禄马、六煞；杂曜按需展开
+  const [showMisc, setShowMisc] = useState(false);
   const { m, ganzhi, termStr } = useLocale();
 
   const palaceMap: Record<number, Palace> = {};
@@ -167,6 +169,7 @@ export default function ChartBoard({
                 overlayStarSiHua={Object.keys(overlayData).length > 0 ? overlayData : undefined}
                 overlayLabel={overlayLabel}
                 onSiHuaClick={(starName, siHua) => onSiHuaClick?.(starName, siHua, timeView)}
+                showMisc={showMisc}
               />
             </div>
           );
@@ -306,6 +309,18 @@ export default function ChartBoard({
         <span className="px-1.5 py-0.5 rounded-full" style={{ color: 'var(--t-faint)', border: '1px solid var(--t-border)' }}>
           {m.chart.clickHint}
         </span>
+        <span className="px-1.5 py-0.5 rounded-full" style={{ color: 'var(--t-faint)', border: '1px solid var(--t-border)' }}>
+          {m.chart.starHint}
+        </span>
+        <button
+          type="button"
+          aria-pressed={showMisc}
+          onClick={() => setShowMisc(v => !v)}
+          className="px-2 py-0.5 rounded-full font-medium transition-colors"
+          style={{ color: 'var(--t-gold)', border: '1px solid var(--t-border-acc)' }}
+        >
+          {showMisc ? m.chart.hideMisc : m.chart.showMisc}
+        </button>
       </motion.div>
     </div>
   );
