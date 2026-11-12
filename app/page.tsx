@@ -38,6 +38,12 @@ function WeakBoundary({ line }: { line: string }) {
   );
 }
 
+/**
+ * 原站（metisziwei.com）运营者的「致用户」公告弹窗与「5/1—5/8 全部功能 + AI 全免费」便利贴。
+ * 本 fork 没有 AI 接口，活动日期也已过，照原样显示会误导用户，默认不显示；代码保留，改为 true 即恢复。
+ */
+const SHOW_UPSTREAM_PROMO = false;
+
 // ─── 主题切换按钮 ────────────────────────────────────────
 function ThemeToggle() {
   const { theme, toggle } = useTheme();
@@ -353,7 +359,7 @@ export default function HomePage() {
   return (
     <div style={{ background: c.bgBase, transition: 'background 0.35s ease' }} className="overflow-x-hidden">
       {/* 致用户公告——首次访问全屏覆盖，关闭后才进入首页 */}
-      <AnnouncementModal />
+      {SHOW_UPSTREAM_PROMO && <AnnouncementModal />}
       <LocaleMeta ko={{ title: '자미 명반 · 니하이샤 정통 자미두수', description: '니하이샤 정통 자미두수 체계로 명반을 만들고, 명격·대한·유년과 연애·직업·재물·건강을 해석합니다.' }} />
 
       <StarField />
@@ -473,7 +479,7 @@ export default function HomePage() {
         </motion.div>
 
         {/* 上线公告便利贴 — 桌面端绝对定位右侧 */}
-        <motion.div
+        {SHOW_UPSTREAM_PROMO && <motion.div
           initial={{ opacity: 0, x: 30, rotate: 0 }}
           animate={{ opacity: 1, x: 0, rotate: -4 }}
           transition={{ delay: 1.4, duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
@@ -502,10 +508,10 @@ export default function HomePage() {
               <strong style={{ color: '#c45a2d' }}>{ko ? ' 모두 무료' : ' 全免费'}</strong>
             </div>
           </div>
-        </motion.div>
+        </motion.div>}
 
         {/* 上线公告便利贴 — 手机端正常流式显示（hero 内容下方居中） */}
-        <motion.div
+        {SHOW_UPSTREAM_PROMO && <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0, rotate: -2 }}
           transition={{ delay: 1.4, duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
@@ -532,7 +538,7 @@ export default function HomePage() {
               {ko ? '전체 기능 + AI ' : '全部功能 + AI '}<strong style={{ color: '#c45a2d' }}>{ko ? '모두 무료' : '全免费'}</strong>
             </div>
           </div>
-        </motion.div>
+        </motion.div>}
 
         {/* 滚动提示（绝对定位，不影响 hero opacity 计算） */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
