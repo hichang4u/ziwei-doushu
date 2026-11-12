@@ -1,7 +1,9 @@
 'use client';
+import { useState } from 'react';
 import type { ZiweiChart } from '@/lib/ziwei/types';
 import { getMingType } from '@/lib/i18n/star-types';
 import { Term, useLocale } from './LocaleProvider';
+import TypeShareModal from './TypeShareModal';
 
 /**
  * 命宫结论卡：盘面上方先给一句话结论（类型昵称 + 关键词 + 当前大限 + 身宫）。
@@ -11,6 +13,7 @@ export default function MingSummaryCard({ chart }: { chart: ZiweiChart }) {
   const { locale, m, termStr } = useLocale();
   const e = m.easy;
   const { stars, borrowedFrom, types } = getMingType(chart, locale);
+  const [shareOpen, setShareOpen] = useState(false);
   if (types.length === 0) return null;
 
   const dx = chart.daXians[chart.currentDaXianIndex];
@@ -71,10 +74,21 @@ export default function MingSummaryCard({ chart }: { chart: ZiweiChart }) {
         )}
       </dl>
 
-      <p className="mt-2 text-[11px] leading-snug" style={{ color: 'var(--t-faint)' }}>
-        {borrowedFrom && <>{e.borrowed(termStr(borrowedFrom))} · </>}
-        {e.note}
-      </p>
+      <div className="mt-2 flex items-end justify-between gap-3">
+        <p className="text-[11px] leading-snug" style={{ color: 'var(--t-faint)' }}>
+          {borrowedFrom && <>{e.borrowed(termStr(borrowedFrom))} · </>}
+          {e.note}
+        </p>
+        <button
+          type="button"
+          onClick={() => setShareOpen(true)}
+          className="flex-shrink-0 px-2.5 py-1 rounded-lg text-[12px] font-medium"
+          style={{ color: 'var(--t-gold)', border: '1px solid var(--t-border-acc)' }}
+        >
+          {e.share.open}
+        </button>
+      </div>
+      <TypeShareModal chart={chart} open={shareOpen} onClose={() => setShareOpen(false)} />
     </section>
   );
 }

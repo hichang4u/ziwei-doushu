@@ -272,18 +272,28 @@ export default function ShareCardCanvas({ chart, birth, highlight }: ShareCardPr
 }
 
 /** 截图工具：把上面的 div 转成 PNG dataURL */
-export async function captureShareCard(): Promise<string | null> {
+export async function captureShareCard(id = 'share-card', scale = 2): Promise<string | null> {
   try {
     const html2canvas = (await import('html2canvas')).default;
-    const node = document.getElementById('share-card');
+    const node = document.getElementById(id);
     if (!node) return null;
-    const canvas = await html2canvas(node, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-      logging: false,
-    });
-    return canvas.toDataURL('image/png');
+    // html2canvas 在当前文档的 body 末尾插一个临时 div，用里面的 <img> 量文字基线；
+    // Tailwind preflight 的 img{display:block} 会让它量偏，截图里文字整体下沉。
+    // 截图期间只把那个临时 div 里的 img 改回行内，截完即移除。
+    const fix = document.createElement('style');
+    fix.textContent = 'body > div:last-child img { display: inline-block !important; }';
+    document.head.appendChild(fix);
+    try {
+      const canvas = await html2canvas(node, {
+        scale,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+      });
+      return canvas.toDataURL('image/png');
+    } finally {
+      fix.remove();
+    }
   } catch (e) {
     console.error('captureShareCard failed', e);
     return null;
