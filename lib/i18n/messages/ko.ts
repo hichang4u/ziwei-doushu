@@ -77,6 +77,17 @@ export const ko: Messages = {
     showMisc: '잡성 보기',
     hideMisc: '잡성 숨기기',
   },
+  basis: {
+    title: '계산 기준',
+    trueSolar: (hhmm, signedMin) => `진태양시 ${hhmm} (${signedMin}분)`,
+    kstWall: (hhmm) => `KST 시각 ${hhmm} (경도 보정 없음)`,
+    noCorrection: '출생지 미선택, 시계 시각 그대로',
+    branch: (shichen) => `${shichen}로 배반`,
+    unknown: '출생 시각을 몰라 자시(23:00–01:00)로 배반',
+    seoulFallback: '출생 도시를 고르지 않아 서울 경도(126.98°E)로 보정했습니다',
+    dstClock: '출생 당시 한국은 서머타임 시행 중이었고, 입력한 시각을 당시 서머타임 시계로 봤습니다',
+    dstStandard: '출생 당시 한국은 서머타임 시행 중이었고, 입력한 시각을 표준시로 봤습니다',
+  },
   notFound: {
     title: '페이지를 찾을 수 없습니다',
     body: '주소가 바뀌었거나 잘못 입력되었습니다.',
@@ -190,6 +201,8 @@ export const ko: Messages = {
     copied: '복사했습니다',
     copyFailed: '복사 실패',
     copyHint: 'ChatGPT·Claude·Gemini 같은 AI 대화창에 붙여 넣으세요. 입력창에 쓴 질문이 있으면 그 질문을, 없으면 지금 고른 주제를 함께 복사합니다.',
+    includeBirth: '생년월일·나이 포함',
+    birthOmittedHint: '기본으로 생년월일과 나이는 빼고 복사합니다. 명반 해석에는 필요 없고, 개인정보를 외부 AI에 넘기지 않기 위해서입니다.',
   },
   library: {
     backHome: '← 홈으로',

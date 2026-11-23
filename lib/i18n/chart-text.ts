@@ -21,6 +21,7 @@ const YIN_YANG_KO: Record<string, string> = {
 
 interface Labels {
   header: string;
+  birthOmitted: string;
   solar: string;
   clockTime: (y: number, mo: number, d: number, h: number, mi: number) => string;
   date: (y: number, mo: number, d: number) => string;
@@ -64,6 +65,7 @@ interface Labels {
 const LABELS: Record<Locale, Labels> = {
   zh: {
     header: '【紫微斗数命盘】',
+    birthOmitted: '（出生日期与年龄未提供）',
     solar: '公历（出生时刻）',
     clockTime: (y, mo, d, h, mi) => `${y}年${mo}月${d}日 ${h}时${String(mi).padStart(2, '0')}分`,
     date: (y, mo, d) => `${y}年${mo}月${d}日`,
@@ -104,6 +106,7 @@ const LABELS: Record<Locale, Labels> = {
   },
   ko: {
     header: '[자미두수 명반]',
+    birthOmitted: '(생년월일과 나이는 제공하지 않음)',
     solar: '양력(출생 시각)',
     clockTime: (y, mo, d, h, mi) => `${y}년 ${mo}월 ${d}일 ${h}시 ${String(mi).padStart(2, '0')}분`,
     date: (y, mo, d) => `${y}년 ${mo}월 ${d}일`,
@@ -152,6 +155,11 @@ const LABELS: Record<Locale, Labels> = {
 export interface ChartTextOptions {
   /** 流年年份；省略则不输出流年段 */
   liunianYear?: number;
+  /**
+   * 不输出出生日期、农历、四柱、当前年龄 —— 这些能还原出生日，解盘本身用不到
+   * （命盘已排好；所处人生阶段由「当前大限」的十年区间给出）。
+   */
+  omitBirth?: boolean;
 }
 
 export function chartToText(chart: ZiweiChart, locale: Locale, opts: ChartTextOptions = {}): string {
@@ -174,10 +182,13 @@ export function chartToText(chart: ZiweiChart, locale: Locale, opts: ChartTextOp
   const lines: string[] = [L.header];
 
   const o = bi.origInput;
-  lines.push(`${L.solar}: ${o ? L.clockTime(o.year, o.month, o.day, o.clockHour, o.clockMinute) : L.date(bi.year, bi.month, bi.day)}`);
+  if (opts.omitBirth) lines.push(L.birthOmitted);
+  else lines.push(`${L.solar}: ${o ? L.clockTime(o.year, o.month, o.day, o.clockHour, o.clockMinute) : L.date(bi.year, bi.month, bi.day)}`);
   lines.push(`${L.hourBranch}: ${L.hour(BRANCHES[bi.hour])}`);
-  lines.push(`${L.lunar}: ${L.lunarDate(li.lunarYear, Math.abs(li.lunarMonth), li.lunarDay, li.isLeapMonth)}`);
-  if (li.fourPillars) lines.push(`${L.fourPillars}: ${li.fourPillars.map(gz).join(' ')}`);
+  if (!opts.omitBirth) {
+    lines.push(`${L.lunar}: ${L.lunarDate(li.lunarYear, Math.abs(li.lunarMonth), li.lunarDay, li.isLeapMonth)}`);
+    if (li.fourPillars) lines.push(`${L.fourPillars}: ${li.fourPillars.map(gz).join(' ')}`);
+  }
   const yy = chart.yinYangGender ? (locale === 'ko' ? YIN_YANG_KO[chart.yinYangGender] ?? chart.yinYangGender : chart.yinYangGender) : '';
   lines.push(`${L.gender}: ${bi.gender === 'male' ? L.male : L.female}${yy ? `, ${yy}` : ''}`);
 
@@ -187,7 +198,7 @@ export function chartToText(chart: ZiweiChart, locale: Locale, opts: ChartTextOp
   lines.push(`${L.wuxingJu}: ${term(chart.wuxingJuName)}`);
   if (chart.mingZhu) lines.push(`${L.mingZhu}: ${term(chart.mingZhu)}`);
   if (chart.shenZhu) lines.push(`${L.shenZhu}: ${term(chart.shenZhu)}`);
-  lines.push(`${L.currentAge}: ${L.age(chart.currentAge)}`);
+  if (!opts.omitBirth) lines.push(`${L.currentAge}: ${L.age(chart.currentAge)}`);
   const dx = chart.daXians[chart.currentDaXianIndex];
   if (dx) lines.push(`${L.currentDaXian}: ${L.ageRange(dx.startAge, dx.endAge)} ${palaceLabel(dx.palaceName)}`);
 

@@ -4,6 +4,7 @@
  * ① 内容：1990-05-15 巳时 男 —— 期望值取自 rath/orrery（sky.told.me）同一输入的盘面，独立对照。
  *    当前年龄 / 当前大限随运行日期变化，不断言。
  * ② 语言：韩文输出不得漏出简体字（应为「한글(漢字)」正体）；中文输出不得出现韩文。
+ * ③ omitBirth：不得出现出生年月日、农历、四柱、当前年龄；盘面内容照常输出。
  */
 import { generateChart } from '../../lib/ziwei/algorithm';
 import { chartToText, withChartData } from '../../lib/i18n/chart-text';
@@ -60,6 +61,23 @@ const zh = chartToText(chart, 'zh', { liunianYear: 2026 });
   const leaks = [...new Set(ko.match(SIMPLIFIED_ONLY) ?? [])];
   if (leaks.length) fail(`韩文输出漏出简体字：${leaks.join('')}`); else ok('韩文输出无简体字');
   if (/[가-힣]/.test(zh)) fail('中文输出出现韩文'); else ok('中文输出无韩文');
+}
+
+/* ── ③ omitBirth ───────────────────────────────────────────────── */
+{
+  for (const [locale, full] of [['ko', ko], ['zh', zh]] as const) {
+    const slim = chartToText(chart, locale, { liunianYear: 2026, omitBirth: true });
+    // 出生年、农历月日、四柱（年柱 庚午 / 日柱 庚辰 可反推生日）、年龄行
+    const leaks = [/1990/, /4월 21일|4月21日/, /경오\(庚午\) 신사|庚午 辛巳/, /세는나이|虚岁/, /10시 30분|10时30分/]
+      .filter((re) => re.test(slim)).map(String);
+    if (leaks.length) fail(`${locale} omitBirth 仍含出生信息：${leaks.join(' ')}`); else ok(`${locale} omitBirth：无出生年月日 / 农历 / 四柱 / 年龄`);
+    const marker = locale === 'ko' ? '(생년월일과 나이는 제공하지 않음)' : '（出生日期与年龄未提供）';
+    const palaces = full.slice(full.indexOf(locale === 'ko' ? '[12궁]' : '【十二宫】'));
+    if (slim.includes(marker) && slim.endsWith(palaces)) ok(`${locale} omitBirth：标明已省略，十二宫及其后内容与完整版一致`);
+    else fail(`${locale} omitBirth：缺少省略说明或盘面内容被改动`);
+    if (slim.includes(locale === 'ko' ? '배반 시진: 사시(巳時)' : '排盘时辰: 巳时') && slim.includes(locale === 'ko' ? '현재 대한:' : '当前大限:')) ok(`${locale} omitBirth：保留时辰与当前大限`);
+    else fail(`${locale} omitBirth：时辰或当前大限丢失`);
+  }
 }
 
 if (bad) { console.log(`\n❌ chart-text 回归失败 ${bad} 项`); process.exit(1); }

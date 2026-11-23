@@ -78,6 +78,18 @@ export const zh = {
     showMisc: '显示杂曜',
     hideMisc: '隐藏杂曜',
   },
+  /** 结果页「排盘依据」：填的时刻 → 校正后时刻 → 时辰 */
+  basis: {
+    title: '排盘依据',
+    trueSolar: (hhmm: string, signedMin: string) => `真太阳时 ${hhmm}（${signedMin} 分钟）`,
+    kstWall: (hhmm: string) => `KST 钟表 ${hhmm}（不做经度校正）`,
+    noCorrection: '未选出生地，按钟表时刻',
+    branch: (shichen: string) => `按${shichen}排盘`,
+    unknown: '出生时刻不详，按子时（23:00–01:00）排盘',
+    seoulFallback: '未选出生城市，按首尔经度（126.98°E）校正',
+    dstClock: '出生时韩国正实行夏令时；所填时刻按当时的夏令时钟表计',
+    dstStandard: '出生时韩国正实行夏令时；所填时刻按标准时计',
+  },
   notFound: {
     title: '页面不存在',
     body: '你访问的地址没有对应的页面，可能已被移动或输入有误。',
@@ -194,6 +206,8 @@ export const zh = {
     copied: '已复制',
     copyFailed: '复制失败',
     copyHint: '粘贴到 DeepSeek、豆包、ChatGPT 等 AI 对话即可。输入框里有问题就复制该问题，否则复制当前选中的主题。',
+    includeBirth: '包含出生日期和年龄',
+    birthOmittedHint: '默认不复制出生日期和年龄：解盘用不到，也不必把个人信息交给外部 AI。',
   },
   library: {
     backHome: '← 返回首页',

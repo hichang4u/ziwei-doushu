@@ -7,6 +7,7 @@ import PatternsCard from '@/components/PatternsCard';
 import StarDetailPanel from '@/components/StarDetailPanel';
 import MingSummaryCard from '@/components/MingSummaryCard';
 import FlowCard from '@/components/FlowCard';
+import BasisNote from '@/components/BasisNote';
 import type { TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
 import { formToBirthInfo } from '@/lib/ziwei/share';
@@ -141,6 +142,8 @@ export default function ChartPage() {
       {/* 窄屏单列（盘面在上、解读在下）；lg 起两列，右栏随滚动吸顶，点星后的详解始终在视野内 */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-5 items-start">
         <div className="min-w-0">
+          {/* 这张盘按哪个时刻、哪种口径排的 */}
+          {savedForm && <BasisNote form={savedForm} />}
           {/* 先给结论：命宫类型 + 当前大限，看不懂盘面也有收获 */}
           <MingSummaryCard chart={chart} />
           <div className="card-glass rounded-xl p-2 sm:p-4">

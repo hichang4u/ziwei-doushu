@@ -101,6 +101,8 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
   // 最近一次自动发出的提示词（主题 / 宫位 / 四化），复制给 AI 时作为默认提问
   const [currentPrompt, setCurrentPrompt] = useState('');
   const [copyState, setCopyState] = useState<{ kind: 'question' | 'data'; ok: boolean } | null>(null);
+  // 复制给外部 AI 的文本默认不带出生日期、年龄（个人信息），需要时再勾选
+  const [includeBirth, setIncludeBirth] = useState(false);
   const messagesRef = useRef<Message[]>([]); // always-current copy for closures
   const loadingRef = useRef(false);
   // /api/interpret 不存在（开源版）：提示只显示一次，之后的提问改走「复制给 AI」
@@ -248,7 +250,7 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
   };
 
   const handleCopy = async (kind: 'question' | 'data') => {
-    const data = chartToText(chart, locale, { liunianYear });
+    const data = chartToText(chart, locale, { liunianYear, omitBirth: !includeBirth });
     const question = input.trim() || currentPrompt || prompts.topics.overview;
     const ok = await copyText(kind === 'data' ? data : withChartData(question, data));
     setCopyState({ kind, ok });
@@ -296,7 +298,13 @@ export default function InsightPanel({ chart, selectedPalace, selectedSiHua, liu
             </button>
           ))}
         </div>
-        <p className="mt-1 text-[12px] leading-snug" style={{ color: 'var(--t-faint)' }}>{t.copyHint}</p>
+        <label className="mt-2 flex items-center gap-2 text-[12px] cursor-pointer" style={{ color: 'var(--t-text2)' }}>
+          <input type="checkbox" checked={includeBirth} onChange={e => setIncludeBirth(e.target.checked)} style={{ width: 16, height: 16 }} />
+          {t.includeBirth}
+        </label>
+        <p className="mt-1 text-[12px] leading-snug" style={{ color: 'var(--t-faint)' }}>
+          {t.copyHint}{!includeBirth && ` ${t.birthOmittedHint}`}
+        </p>
       </div>
 
       {/* ── Messages ── */}
