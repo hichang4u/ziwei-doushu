@@ -488,3 +488,12 @@ body {
 
 /* 韩文首帧：LOCALE_BOOT_SCRIPT 判定为韩文时先隐藏，LocaleProvider 切到韩文后移除（lib/i18n/index.ts） */
 html.locale-pending body { visibility: hidden; }
+
+/* 咨询模式：翻到新卡片时淡入（components/ConsultMode.tsx） */
+@keyframes consult-card-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .consult-card { animation: consult-card-in 0.35s ease-out both; }
+}

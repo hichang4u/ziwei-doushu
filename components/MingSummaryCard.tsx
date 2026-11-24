@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ZiweiChart } from '@/lib/ziwei/types';
 import { getMingType } from '@/lib/i18n/star-types';
 import { Term, useLocale } from './LocaleProvider';
 import TypeShareModal from './TypeShareModal';
+import ConsultMode from './ConsultMode';
 
 /**
  * 命宫结论卡：盘面上方先给一句话结论（类型昵称 + 关键词 + 当前大限 + 身宫）。
@@ -14,6 +15,8 @@ export default function MingSummaryCard({ chart }: { chart: ZiweiChart }) {
   const e = m.easy;
   const { stars, borrowedFrom, types } = getMingType(chart, locale);
   const [shareOpen, setShareOpen] = useState(false);
+  const [consultOpen, setConsultOpen] = useState(false);
+  const consultBtn = useRef<HTMLButtonElement>(null);
   if (types.length === 0) return null;
 
   const dx = chart.daXians[chart.currentDaXianIndex];
@@ -74,21 +77,36 @@ export default function MingSummaryCard({ chart }: { chart: ZiweiChart }) {
         )}
       </dl>
 
-      <div className="mt-2 flex items-end justify-between gap-3">
-        <p className="text-[13px] leading-snug" style={{ color: 'var(--t-faint)' }}>
+      <div className="mt-2 flex items-end justify-between gap-3 flex-wrap">
+        <p className="min-w-0 flex-1 basis-[220px] text-[13px] leading-snug" style={{ color: 'var(--t-faint)' }}>
           {borrowedFrom && <>{e.borrowed(termStr(borrowedFrom))} · </>}
           {e.note}
         </p>
-        <button
-          type="button"
-          onClick={() => setShareOpen(true)}
-          className="flex-shrink-0 px-3 py-2 rounded-lg text-[13px] font-medium"
-          style={{ color: 'var(--t-gold)', border: '1px solid var(--t-border-acc)' }}
-        >
-          {e.share.open}
-        </button>
+        <div className="flex-shrink-0 flex gap-2">
+          <button
+            ref={consultBtn}
+            type="button"
+            onClick={() => setConsultOpen(true)}
+            className="px-3 py-2 rounded-lg text-[13px] font-semibold"
+            style={{ color: 'var(--t-gold)', background: 'var(--ac-bg)', border: '1px solid var(--t-gold)' }}
+          >
+            {m.consult.open}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            className="px-3 py-2 rounded-lg text-[13px] font-medium"
+            style={{ color: 'var(--t-gold)', border: '1px solid var(--t-border-acc)' }}
+          >
+            {e.share.open}
+          </button>
+        </div>
       </div>
       <TypeShareModal chart={chart} open={shareOpen} onClose={() => setShareOpen(false)} />
+      {/* 咨询模式：按需挂载，关掉后把焦点还给按钮 */}
+      {consultOpen && (
+        <ConsultMode chart={chart} onClose={() => { setConsultOpen(false); consultBtn.current?.focus(); }} />
+      )}
     </section>
   );
 }
